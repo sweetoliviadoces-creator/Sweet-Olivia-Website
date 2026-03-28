@@ -536,10 +536,10 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       </div>
       <div id="addrBlock" style="display:none">
         <label class="field-lbl" style="margin-bottom:10px;">📍 Endereço de entrega</label>
-        <input type="text" class="field-inp" id="coRua" placeholder="Rua / Avenida" style="margin-bottom:8px;">
+        <input type="text" class="field-inp" id="coRua" placeholder="Rua / Avenida" style="margin-bottom:8px;" oninput="resetarTaxa()">
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <div style="flex:1;">
-            <input type="text" class="field-inp" id="coNumero" placeholder="Número" id="coNumero">
+            <input type="text" class="field-inp" id="coNumero" placeholder="Número" id="coNumero" oninput="resetarTaxa()">
           </div>
           <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;color:#666;white-space:nowrap;cursor:pointer;">
             <input type="checkbox" id="coSemNumero" onchange="toggleSemNumero()" style="accent-color:var(--pink);width:16px;height:16px;"> Sem número
@@ -547,9 +547,15 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
         </div>
         <input type="text" class="field-inp" id="coComplemento" placeholder="Complemento (Casa, Apto, Sala...)" style="margin-bottom:8px;">
         <input type="text" class="field-inp" id="coReferencia" placeholder="Ponto de referência (Em frente ao...)" style="margin-bottom:8px;">
-        <input type="text" class="field-inp" id="coBairro" placeholder="Bairro" style="margin-bottom:8px;">
-        <input type="text" class="field-inp" id="coCidade" placeholder="Cidade" value="Juazeiro do Norte" style="margin-bottom:4px;">
-        <div class="delivery-note">Taxa de entrega a combinar</div>
+        <input type="text" class="field-inp" id="coBairro" placeholder="Bairro" style="margin-bottom:8px;" oninput="resetarTaxa()">
+        <input type="text" class="field-inp" id="coCidade" placeholder="Cidade" value="Juazeiro do Norte" style="margin-bottom:10px;" oninput="resetarTaxa()">
+        <!-- Botão calcular taxa -->
+        <button onclick="calcularTaxaEntrega()" id="btnCalcularTaxa"
+          style="width:100%;background:var(--pink-dark);color:white;border:none;border-radius:12px;padding:11px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;">
+          🛵 Calcular taxa de entrega
+        </button>
+        <!-- Resultado da taxa -->
+        <div id="taxaResultBox" style="display:none;border-radius:12px;padding:12px 14px;margin-bottom:4px;"></div>
       </div>
       <label class="field-lbl" style="margin-top:14px;">Forma de pagamento</label>
       <div class="radio-grp">
@@ -559,6 +565,21 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
         <label class="radio-pill" id="pill-din" onclick="selPag('Dinheiro')">
           <div class="rpill-circle"><div class="rpill-inner"></div></div>Dinheiro
         </label>
+      </div>
+      <!-- PIX Info Box -->
+      <div id="pixInfoBox" style="margin-top:14px;background:#f0faf4;border:1.5px solid #a5d6a7;border-radius:14px;padding:14px 16px;display:block;">
+        <div style="font-size:.78rem;font-weight:800;color:#2e7d32;letter-spacing:1px;margin-bottom:8px;">🔑 CHAVE PIX</div>
+        <div style="font-size:.82rem;color:#555;font-weight:700;margin-bottom:6px;">Copie a chave abaixo:</div>
+        <div style="display:flex;align-items:center;gap:6px;background:white;border:1.5px solid #c8e6c9;border-radius:10px;padding:8px 12px;margin-bottom:10px;">
+          <span id="pixKeyDisplay" style="font-size:.88rem;font-weight:800;color:#1b5e20;flex:1;word-break:break-all;">sweetoliviadoces@gmail.com</span>
+          <button onclick="copiarPix()" style="background:#25D366;color:white;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;">📋 Copiar</button>
+        </div>
+        <div id="pixDeliveryNote" style="display:none;border-radius:8px;padding:8px 11px;font-size:.78rem;font-weight:700;margin-bottom:8px;line-height:1.5;background:#fff3e0;color:#e65100;">
+          🛵 <b>Calcule a taxa antes de pagar!</b> Clique em "Calcular taxa de entrega" acima para ver o total final.
+        </div>
+        <div style="background:#fff8e1;border-radius:8px;padding:7px 10px;font-size:.75rem;color:#f57f17;font-weight:700;">
+          ⚠️ Após pagar, envie o comprovante pelo WhatsApp!
+        </div>
       </div>
       <div class="checkout-total-bar">
         <span>Total:</span>
@@ -724,6 +745,37 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
             <div><div class="cfg-label">WhatsApp</div></div>
             <input type="text" id="cfgWA" class="cfg-input" style="max-width:160px;text-align:left;" placeholder="5588988392203">
           </div>
+          <div class="cfg-row" style="margin-top:10px;">
+            <div><div class="cfg-label">Chave PIX</div><div class="cfg-sub">E-mail, CPF, telefone ou chave aleatória</div></div>
+            <input type="text" id="cfgPixKey" class="cfg-input" style="max-width:220px;text-align:left;" placeholder="email@exemplo.com">
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">🛵 Taxa de Entrega</div>
+          <div class="cfg-sub" style="margin-bottom:10px;">Fórmula: Taxa base + (km × Valor/km) + Margem. Mínimo garantido.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <div class="cfg-label">Taxa base (R$)</div>
+              <input type="number" id="cfgTaxaBase" class="cfg-input" step="0.50" min="0" placeholder="2.50" style="max-width:100%;">
+            </div>
+            <div>
+              <div class="cfg-label">Por km (R$)</div>
+              <input type="number" id="cfgTaxaPorKm" class="cfg-input" step="0.10" min="0" placeholder="1.80" style="max-width:100%;">
+            </div>
+            <div>
+              <div class="cfg-label">Margem (R$)</div>
+              <input type="number" id="cfgTaxaMargem" class="cfg-input" step="0.50" min="0" placeholder="2.00" style="max-width:100%;">
+            </div>
+            <div>
+              <div class="cfg-label">Mínimo (R$)</div>
+              <input type="number" id="cfgTaxaMinimo" class="cfg-input" step="0.50" min="0" placeholder="7.00" style="max-width:100%;">
+            </div>
+            <div style="grid-column:1/-1;">
+              <div class="cfg-label">Distância máxima (km)</div>
+              <div class="cfg-sub">Acima disso exibe "a combinar"</div>
+              <input type="number" id="cfgTaxaMaxKm" class="cfg-input" step="1" min="1" placeholder="15" style="max-width:100%;">
+            </div>
+          </div>
         </div>
         <div class="admin-card">
           <div class="admin-card-title">Logo do Site</div>
@@ -863,7 +915,18 @@ import { getDatabase, ref, onValue, set, get, remove } from "https://www.gstatic
 
 const ADMIN_PASS="88182658Benicio",WA_DEFAULT="5588988392203";
 let MIN=20, WA=WA_DEFAULT;
+let pixKey="sweetoliviadoces@gmail.com";
 let openHour=12, closeHour=21;
+// Config taxa de entrega (estilo Uber Moto)
+let taxaConfig = {
+  base: 0,         // sem taxa base fixa
+  porKm: 2.00,     // R$ por km
+  margem: 0,       // sem margem fixa
+  minimo: 5.00,    // mínimo cobrado (vizinhança)
+  maxKm: 15        // km máximo (acima = a combinar)
+};
+// Coordenadas da loja (Rua Cícera Aurélia, 115 — Betolândia, Juazeiro do Norte)
+const LOJA_LAT = -7.2290, LOJA_LNG = -39.2815;
 let bannerText="Pedido mínimo: <b>R$ 20,00</b> • Entrega com taxa a combinar";
 let bannerColor="#7B2D52";
 let showPascoaBanner=true;
@@ -1215,6 +1278,8 @@ function goCheckout(){
     }
   }
   document.getElementById("checkoutOverlay").classList.add("open");
+  // Garante que o box PIX aparece e QR é gerado na abertura (padrão PIX)
+  selPag(pag);
 }
 function closeCheckout(){document.getElementById("checkoutOverlay").classList.remove("open");}
 function toggleSemNumero(){
@@ -1240,11 +1305,181 @@ function selEntrega(mode){
   }
   const base=cartTotal();
   document.getElementById("coTotal").textContent=mode==="entrega"?fmt(base)+" + taxa a combinar":fmt(base);
+  if(mode==="retirada") resetarTaxa();
+  if(pag==="PIX") atualizarAvisoEntrega();
 }
 function selPag(mode){
   pag=mode;
   document.getElementById("pill-pix").classList.toggle("sel",mode==="PIX");
   document.getElementById("pill-din").classList.toggle("sel",mode==="Dinheiro");
+  const pixBox = document.getElementById("pixInfoBox");
+  if(pixBox) pixBox.style.display = mode==="PIX" ? "block" : "none";
+  if(mode==="PIX"){
+    const keyDisplay = document.getElementById("pixKeyDisplay");
+    if(keyDisplay) keyDisplay.textContent = pixKey;
+    atualizarAvisoEntrega();
+  }
+}
+
+function atualizarAvisoEntrega(){
+  const note = document.getElementById("pixDeliveryNote");
+  if(!note) return;
+  if(entrega !== "entrega"){ note.style.display = "none"; return; }
+  if(taxaCalculada){
+    note.style.display = "block";
+    note.innerHTML = `💚 <b>Taxa calculada: ${fmt(taxaCalculada)}</b> — Realize o pagamento do total acima e envie o comprovante pelo WhatsApp!`;
+    note.style.color = "#2e7d32";
+    note.style.background = "#e8f5e9";
+  } else {
+    note.style.display = "block";
+    note.innerHTML = `🛵 <b>Calcule a taxa antes de pagar!</b> Clique em "Calcular taxa de entrega" acima para ver o total final.`;
+    note.style.color = "#e65100";
+    note.style.background = "#fff3e0";
+  }
+}
+
+function atualizarQRCode(){} // mantido para compatibilidade
+
+// ===== CÁLCULO DE TAXA DE ENTREGA =====
+let taxaCalculada = null;
+
+function resetarTaxa(){
+  taxaCalculada = null;
+  const box = document.getElementById("taxaResultBox");
+  if(box) box.style.display = "none";
+  // Volta total para "sem taxa"
+  const base = cartTotal();
+  document.getElementById("coTotal").textContent = fmt(base) + " + taxa a combinar";
+}
+
+async function calcularTaxaEntrega(){
+  const rua    = document.getElementById("coRua").value.trim();
+  const bairro = document.getElementById("coBairro").value.trim();
+  const cidade = document.getElementById("coCidade").value.trim();
+  if(!rua || !bairro || !cidade){
+    alert("Preencha pelo menos a rua, bairro e cidade para calcular a taxa.");
+    return;
+  }
+  const btn = document.getElementById("btnCalcularTaxa");
+  btn.textContent = "⏳ Calculando...";
+  btn.disabled = true;
+
+  const enderecoCompleto = `${rua}, ${bairro}, ${cidade}, Ceará, Brasil`;
+  try {
+    // 1. Geocodificar endereço do cliente via Nominatim (OpenStreetMap)
+    const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(enderecoCompleto)}&format=json&limit=1&countrycodes=br`;
+    const geoRes = await fetch(geoUrl, { headers:{ "Accept-Language":"pt-BR" } });
+    const geoData = await geoRes.json();
+
+    if(!geoData || !geoData.length){
+      mostrarTaxaErro("Endereço não encontrado. Verifique e tente novamente.");
+      btn.innerHTML = "🛵 Calcular taxa de entrega"; btn.disabled = false;
+      return;
+    }
+
+    const destLat = parseFloat(geoData[0].lat);
+    const destLng = parseFloat(geoData[0].lon);
+
+    // 2. Calcular rota via OSRM (gratuito, sem chave)
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${LOJA_LNG},${LOJA_LAT};${destLng},${destLat}?overview=false`;
+    const routeRes = await fetch(osrmUrl);
+    const routeData = await routeRes.json();
+
+    if(!routeData.routes || !routeData.routes.length){
+      mostrarTaxaErro("Não foi possível calcular a rota. Tente novamente.");
+      btn.innerHTML = "🛵 Calcular taxa de entrega"; btn.disabled = false;
+      return;
+    }
+
+    const distKm = routeData.routes[0].distance / 1000;
+
+    // 3. Aplicar fórmula: base + (km × porKm) + margem, mínimo garantido
+    if(distKm > taxaConfig.maxKm){
+      mostrarTaxaIndisponivel(distKm);
+      taxaCalculada = null;
+    } else {
+      let taxa = taxaConfig.base + (distKm * taxaConfig.porKm) + taxaConfig.margem;
+      taxa = Math.max(taxa, taxaConfig.minimo);
+      // Arredondar para cima no R$1 mais próximo
+      taxa = Math.ceil(taxa);
+      taxaCalculada = taxa;
+      mostrarTaxaSucesso(distKm, taxa);
+    }
+
+  } catch(e){
+    mostrarTaxaErro("Erro ao calcular. Verifique sua conexão e tente novamente.");
+    console.error("Taxa calc error:", e);
+  }
+
+  btn.innerHTML = "🛵 Recalcular taxa"; btn.disabled = false;
+}
+
+function mostrarTaxaSucesso(distKm, taxa){
+  const box = document.getElementById("taxaResultBox");
+  const totalComTaxa = cartTotal() + taxa;
+  box.style.display = "block";
+  box.style.background = "#e8f5e9";
+  box.style.border = "1.5px solid #a5d6a7";
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="font-size:1.3rem;">🛵</span>
+      <div>
+        <div style="font-size:.78rem;font-weight:800;color:#2e7d32;letter-spacing:.5px;">TAXA DE ENTREGA CALCULADA</div>
+        <div style="font-size:.72rem;color:#555;">${distKm.toFixed(1)} km de distância</div>
+      </div>
+      <div style="margin-left:auto;font-size:1.1rem;font-weight:800;color:#2e7d32;">${fmt(taxa)}</div>
+    </div>
+    <div style="background:white;border-radius:8px;padding:8px 10px;font-size:.78rem;color:#555;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span>Itens</span><span style="font-weight:700;">${fmt(cartTotal())}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span>🛵 Entrega</span><span style="font-weight:700;">${fmt(taxa)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:.85rem;color:#1b5e20;border-top:1px solid #e0e0e0;padding-top:5px;margin-top:4px;"><span>Total</span><span>${fmt(totalComTaxa)}</span></div>
+    </div>`;
+  // Atualiza total no checkout
+  document.getElementById("coTotal").textContent = fmt(totalComTaxa);
+  // Atualiza aviso do PIX
+  if(pag==="PIX") atualizarAvisoEntrega();
+}
+
+function mostrarTaxaIndisponivel(distKm){
+  const box = document.getElementById("taxaResultBox");
+  box.style.display = "block";
+  box.style.background = "#fff3e0";
+  box.style.border = "1.5px solid #ffcc80";
+  box.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:1.2rem;">⚠️</span>
+      <div>
+        <div style="font-size:.82rem;font-weight:800;color:#e65100;">Entrega a combinar</div>
+        <div style="font-size:.75rem;color:#555;">Distância de ${distKm.toFixed(1)} km — entre em contato pelo WhatsApp para confirmar a entrega.</div>
+      </div>
+    </div>`;
+  document.getElementById("coTotal").textContent = fmt(cartTotal()) + " + taxa a combinar";
+}
+
+function mostrarTaxaErro(msg){
+  const box = document.getElementById("taxaResultBox");
+  box.style.display = "block";
+  box.style.background = "#ffebee";
+  box.style.border = "1.5px solid #ef9a9a";
+  box.innerHTML = `<div style="font-size:.82rem;font-weight:700;color:#c62828;">❌ ${msg}</div>`;
+}
+
+function copiarPix(){
+  navigator.clipboard.writeText(pixKey).then(()=>{
+    const btn = event.target;
+    btn.textContent = "✅ Copiado!";
+    setTimeout(()=>btn.textContent="📋 Copiar", 2000);
+  }).catch(()=>{
+    const el = document.createElement("textarea");
+    el.value = pixKey;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    const btn = event.target;
+    btn.textContent = "✅ Copiado!";
+    setTimeout(()=>btn.textContent="📋 Copiar", 2000);
+  });
 }
 function enviar(){
   const nome=document.getElementById("coNome").value.trim();
@@ -1284,6 +1519,7 @@ function enviar(){
     endereco,
     pagamento: pag,
     total: cartTotal(),
+    taxaEntrega: (entrega==="entrega" && taxaCalculada) ? taxaCalculada : 0,
     status: "aguardando",
     createdAt: Date.now(),
     itens: cart.map(i=>({
@@ -1311,6 +1547,8 @@ function enviar(){
     }
   }
   // Build WhatsApp message
+  const taxaMsg = (entrega==="entrega" && taxaCalculada) ? taxaCalculada : 0;
+  const totalFinalMsg = cartTotal() + taxaMsg;
   let msg=`🍬 *Novo Pedido #${orderNum}* via Sweet Olivia\n\n`;
   cart.forEach(item=>{
     msg+=`${item.qty}x ${item.name} — ${fmt(item.price*item.qty)}`;
@@ -1320,14 +1558,25 @@ function enviar(){
   });
   msg+=`\n*Subtotal:* ${fmt(cartTotal())}`;
   msg+=`\n*Pagamento:* ${pag}`;
-  if(entrega==="entrega") msg+=`\n*Entrega:* ${endereco}\nTaxa a combinar`;
-  else msg+=`\n*Retirada* no local`;
+  if(entrega==="entrega"){
+    msg+=`\n*Entrega:* ${endereco}`;
+    if(taxaMsg>0){
+      msg+=`\n*🛵 Taxa de entrega:* ${fmt(taxaMsg)}`;
+      msg+=`\n*💰 Total com entrega:* ${fmt(totalFinalMsg)}`;
+    } else {
+      msg+=`\nTaxa a combinar`;
+    }
+  } else {
+    msg+=`\n*Retirada* no local`;
+    msg+=`\n*💰 Total:* ${fmt(cartTotal())}`;
+  }
   msg+=`\n*Cliente:* ${nome} / ${tel}`;
   msg+=`\n*Código:* ${pedidoId}`;
   msg+=`\n\nAcompanhe: https://sweetoliviadoces.netlify.app/pedidos.html?id=${pedidoId}`;
   closeCheckout();
   addOrderToStats(cartTotal());
   cart=[];
+  taxaCalculada = null;
   // Show tracking modal
   showTrackingModal(pedidoId, orderNum);
   setTimeout(()=>window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank"),1000);
@@ -1423,6 +1672,19 @@ function saveConfig(){
   applyPascoaBanner();
   const wa = document.getElementById('cfgWA').value.trim();
   if(wa) WA = wa;
+  const pk = document.getElementById('cfgPixKey').value.trim();
+  if(pk) pixKey = pk;
+  // Taxa de entrega
+  const tb = parseFloat(document.getElementById('cfgTaxaBase').value);
+  const tk = parseFloat(document.getElementById('cfgTaxaPorKm').value);
+  const tm = parseFloat(document.getElementById('cfgTaxaMargem').value);
+  const tmin = parseFloat(document.getElementById('cfgTaxaMinimo').value);
+  const tmax = parseFloat(document.getElementById('cfgTaxaMaxKm').value);
+  if(!isNaN(tb)) taxaConfig.base = tb;
+  if(!isNaN(tk)) taxaConfig.porKm = tk;
+  if(!isNaN(tm)) taxaConfig.margem = tm;
+  if(!isNaN(tmin)) taxaConfig.minimo = tmin;
+  if(!isNaN(tmax)) taxaConfig.maxKm = tmax;
   // Update banner display
   const bannerEl = document.getElementById('mainBanner'); if(bannerEl) bannerEl.style.background = bannerColor; const bannerTxtEl2 = document.getElementById('bannerText'); if(bannerTxtEl2) bannerTxtEl2.innerHTML = bannerText;
   const pascoa = document.querySelector('.pascoa-card');
@@ -1447,6 +1709,12 @@ function loadConfigUI(){
   document.getElementById('cfgPascoaDest').value = pascoaConfig.dest;
   document.getElementById('cfgPascoaColor').value = pascoaConfig.color;
   document.getElementById('cfgWA').value = WA;
+  document.getElementById('cfgPixKey').value = pixKey;
+  document.getElementById('cfgTaxaBase').value = taxaConfig.base;
+  document.getElementById('cfgTaxaPorKm').value = taxaConfig.porKm;
+  document.getElementById('cfgTaxaMargem').value = taxaConfig.margem;
+  document.getElementById('cfgTaxaMinimo').value = taxaConfig.minimo;
+  document.getElementById('cfgTaxaMaxKm').value = taxaConfig.maxKm;
 }
 
 // ===== STATS =====
@@ -2503,7 +2771,7 @@ function fbSave(){
     status,
     customClosedMsg,
     photos: photoData,
-    config: { MIN, WA, openHour, closeHour, bannerText, bannerColor, showPascoaBanner, pascoaConfig, logoB64: logoB64||null },
+    config: { MIN, WA, pixKey, taxaConfig, openHour, closeHour, bannerText, bannerColor, showPascoaBanner, pascoaConfig, logoB64: logoB64||null },
     categories: categories.map(cat=>({
       id: cat.id,
       label: cat.label,
@@ -2560,6 +2828,8 @@ function fbLoad(){
         const cfg = data.config;
         if(cfg.MIN!=null) MIN = cfg.MIN;
         if(cfg.WA) WA = cfg.WA;
+        if(cfg.pixKey) pixKey = cfg.pixKey;
+        if(cfg.taxaConfig) taxaConfig = {...taxaConfig, ...cfg.taxaConfig};
         if(cfg.openHour!=null) openHour = cfg.openHour;
         if(cfg.closeHour!=null) closeHour = cfg.closeHour;
         if(cfg.bannerText) bannerText = cfg.bannerText;
@@ -2704,7 +2974,7 @@ function voltarListaPedidos(){
 // ===== EXPOSE TO GLOBAL (needed for type="module") =====
 Object.assign(window,{
   goTo,openItem,closeItem,chQty,selComp,addCart,concluir,
-  openCart,closeCart,cqty,goCheckout,closeCheckout,selEntrega,selPag,enviar,toggleSemNumero,showTrackingModal,
+  openCart,closeCart,cqty,goCheckout,closeCheckout,selEntrega,selPag,enviar,toggleSemNumero,showTrackingModal,copiarPix,atualizarQRCode,atualizarAvisoEntrega,calcularTaxaEntrega,resetarTaxa,
   openTrackingPage,closeTrackingPage,buscarMeuPedido,renderTrackingLogin,
   openClientLogin,closeClientLogin,showClientLogin,showClientRegister,
   clientLogin,clientRegister,clientLogout,
