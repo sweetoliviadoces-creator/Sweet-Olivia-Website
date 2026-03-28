@@ -397,6 +397,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
     </div>
     <div id="clientBarLogged" style="display:none;align-items:center;gap:8px;">
       <span style="font-size:.8rem;font-weight:800;opacity:.95;" id="clientBarName">👋 Olá!</span>
+      <button onclick="openPerfil()" title="Meu perfil" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">👤</button>
       <button onclick="openTrackingPage()" style="background:var(--pink);color:white;border:none;border-radius:20px;padding:7px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;">🎂 Pedidos</button>
       <button onclick="clientLogout()" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:20px;padding:7px 10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Sair</button>
     </div>
@@ -424,6 +425,17 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
     <button class="pascoa-btn" id="pascoaBtnEl" onclick="event.stopPropagation();pascoaGoTo()">Ver cardápio completo</button>
   </div>
   <div id="sectionsContainer"></div>
+</div>
+
+<!-- PERFIL DO CLIENTE -->
+<div class="overlay" id="perfilOverlay">
+  <div class="item-modal" style="border-radius:22px 22px 0 0;max-height:94vh;">
+    <div style="background:var(--pink-dark);color:white;padding:18px 20px;border-radius:22px 22px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;">👤 Meu Perfil</div>
+      <button onclick="closePerfil()" style="background:rgba(255,255,255,.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;">×</button>
+    </div>
+    <div id="perfilContent" style="padding:18px 20px;overflow-y:auto;flex:1;"></div>
+  </div>
 </div>
 
 <footer>
@@ -790,6 +802,24 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
             <button onclick="resetarLogo()" class="cfg-upload-btn" style="background:#888;margin-top:2px;">↺ Restaurar original</button>
           </div>
         </div>
+        <div class="admin-card">
+          <div class="admin-card-title">🎁 Programa de Fidelidade</div>
+          <div class="cfg-sub" style="margin-bottom:10px;">O cliente ganha recompensa após X pedidos entregues.</div>
+          <div class="cfg-row" style="margin-bottom:10px;">
+            <div><div class="cfg-label">Ativo</div></div>
+            <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;cursor:pointer;">
+              <input type="checkbox" id="cfgFidAtivo" style="accent-color:var(--pink);width:16px;height:16px;"> Programa ativado
+            </label>
+          </div>
+          <div class="cfg-row" style="margin-bottom:10px;">
+            <div><div class="cfg-label">Pedidos para recompensa</div><div class="cfg-sub">Ex: a cada 5 pedidos</div></div>
+            <input type="number" id="cfgFidPedidos" class="cfg-input" min="1" max="50" step="1" placeholder="5" style="max-width:80px;">
+          </div>
+          <div style="margin-top:4px;">
+            <div class="cfg-label" style="margin-bottom:5px;">Descrição da recompensa</div>
+            <input type="text" id="cfgFidRecompensa" class="cfg-input" style="width:100%;max-width:100%;text-align:left;" placeholder="Ex: Um doce grátis na sua escolha! 🍬" maxlength="80">
+          </div>
+        </div>
         <button class="btn-save-cfg" onclick="saveConfig()">💾 Salvar configurações</button>
       </div>
 
@@ -917,6 +947,11 @@ const ADMIN_PASS="88182658Benicio",WA_DEFAULT="5588988392203";
 let MIN=20, WA=WA_DEFAULT;
 let pixKey="sweetoliviadoces@gmail.com";
 let openHour=12, closeHour=21;
+let fidelidadeConfig = {
+  ativo: true,
+  pedidosParaRecompensa: 5,
+  recompensa: "Um doce grátis na sua escolha! 🍬"
+};
 // Config taxa de entrega (estilo Uber Moto)
 let taxaConfig = {
   base: 0,         // sem taxa base fixa
@@ -1685,6 +1720,12 @@ function saveConfig(){
   if(!isNaN(tm)) taxaConfig.margem = tm;
   if(!isNaN(tmin)) taxaConfig.minimo = tmin;
   if(!isNaN(tmax)) taxaConfig.maxKm = tmax;
+  // Fidelidade
+  fidelidadeConfig.ativo = document.getElementById('cfgFidAtivo').checked;
+  const fp = parseInt(document.getElementById('cfgFidPedidos').value);
+  if(!isNaN(fp) && fp>0) fidelidadeConfig.pedidosParaRecompensa = fp;
+  const fr = document.getElementById('cfgFidRecompensa').value.trim();
+  if(fr) fidelidadeConfig.recompensa = fr;
   // Update banner display
   const bannerEl = document.getElementById('mainBanner'); if(bannerEl) bannerEl.style.background = bannerColor; const bannerTxtEl2 = document.getElementById('bannerText'); if(bannerTxtEl2) bannerTxtEl2.innerHTML = bannerText;
   const pascoa = document.querySelector('.pascoa-card');
@@ -1715,6 +1756,9 @@ function loadConfigUI(){
   document.getElementById('cfgTaxaMargem').value = taxaConfig.margem;
   document.getElementById('cfgTaxaMinimo').value = taxaConfig.minimo;
   document.getElementById('cfgTaxaMaxKm').value = taxaConfig.maxKm;
+  document.getElementById('cfgFidAtivo').checked = fidelidadeConfig.ativo;
+  document.getElementById('cfgFidPedidos').value = fidelidadeConfig.pedidosParaRecompensa;
+  document.getElementById('cfgFidRecompensa').value = fidelidadeConfig.recompensa;
 }
 
 // ===== STATS =====
@@ -1883,6 +1927,9 @@ function pedidoCardHTML(p, concluido=false){
       <span class="pedido-card-num">#${p.num} — ${p.nome}</span>
       <div style="display:flex;align-items:center;gap:6px;">
         <span class="pedido-card-time">${agoStr}</span>
+        <button onclick="imprimirComanda('${p.id}')" title="Imprimir comanda"
+          style="background:none;border:none;cursor:pointer;font-size:.95rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .2s;"
+          onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'">🖨️</button>
         <button onclick="apagarPedido('${p.id}','${p.num}')" title="Apagar pedido"
           style="background:none;border:none;cursor:pointer;font-size:.95rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .2s;"
           onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'">🗑️</button>
@@ -2771,7 +2818,7 @@ function fbSave(){
     status,
     customClosedMsg,
     photos: photoData,
-    config: { MIN, WA, pixKey, taxaConfig, openHour, closeHour, bannerText, bannerColor, showPascoaBanner, pascoaConfig, logoB64: logoB64||null },
+    config: { MIN, WA, pixKey, taxaConfig, fidelidadeConfig, openHour, closeHour, bannerText, bannerColor, showPascoaBanner, pascoaConfig, logoB64: logoB64||null },
     categories: categories.map(cat=>({
       id: cat.id,
       label: cat.label,
@@ -2830,6 +2877,7 @@ function fbLoad(){
         if(cfg.WA) WA = cfg.WA;
         if(cfg.pixKey) pixKey = cfg.pixKey;
         if(cfg.taxaConfig) taxaConfig = {...taxaConfig, ...cfg.taxaConfig};
+        if(cfg.fidelidadeConfig) fidelidadeConfig = {...fidelidadeConfig, ...cfg.fidelidadeConfig};
         if(cfg.openHour!=null) openHour = cfg.openHour;
         if(cfg.closeHour!=null) closeHour = cfg.closeHour;
         if(cfg.bannerText) bannerText = cfg.bannerText;
@@ -2972,6 +3020,304 @@ function voltarListaPedidos(){
 })();
 
 // ===== EXPOSE TO GLOBAL (needed for type="module") =====
+// ===== PERFIL DO CLIENTE =====
+function openPerfil(){
+  if(!clientUser) return;
+  document.getElementById('perfilOverlay').classList.add('open');
+  renderPerfil();
+}
+function closePerfil(){
+  document.getElementById('perfilOverlay').classList.remove('open');
+}
+
+async function renderPerfil(){
+  const el = document.getElementById('perfilContent');
+  el.innerHTML = `<div style="text-align:center;padding:20px;color:#aaa;">Carregando... 🍬</div>`;
+
+  // Busca dados do cliente e pedidos
+  const [snapCliente, snapPedidos] = await Promise.all([
+    get(ref(db, 'clientes/'+clientUser.uid)),
+    get(ref(db, 'pedidos'))
+  ]);
+  const clienteData = snapCliente.val()||{};
+  const todosPedidos = snapPedidos.val()||{};
+
+  // Pedidos deste cliente (entregues)
+  const cleanTel = s=>s.replace(/\D/g,'');
+  const meusPedidos = Object.values(todosPedidos)
+    .filter(p=> cleanTel(p.tel)===cleanTel(clientUser.tel))
+    .sort((a,b)=>b.createdAt-a.createdAt);
+  const entregues = meusPedidos.filter(p=>p.status==='entregue').length;
+
+  // Fidelidade
+  const meta = fidelidadeConfig.pedidosParaRecompensa||5;
+  const progresso = entregues % meta;
+  const ciclos = Math.floor(entregues / meta);
+  const pct = Math.round((progresso/meta)*100);
+  const fidHTML = fidelidadeConfig.ativo ? `
+    <div style="background:linear-gradient(135deg,#7B2D52,#F06292);border-radius:14px;padding:16px;color:white;margin-bottom:14px;">
+      <div style="font-size:.72rem;font-weight:800;letter-spacing:1px;opacity:.85;margin-bottom:4px;">🎁 PROGRAMA DE FIDELIDADE</div>
+      <div style="font-size:.95rem;font-weight:800;margin-bottom:10px;">${progresso} de ${meta} pedidos para sua recompensa!</div>
+      <div style="background:rgba(255,255,255,.25);border-radius:20px;height:10px;overflow:hidden;margin-bottom:8px;">
+        <div style="background:white;height:100%;width:${pct}%;border-radius:20px;transition:width .4s;"></div>
+      </div>
+      <div style="font-size:.75rem;opacity:.9;">${ciclos>0?`✅ Você já ganhou ${ciclos} recompensa${ciclos>1?'s':''}! `:''}${progresso===0&&ciclos>0?'Continue pedindo 🎉':''}
+      Recompensa: <b>${fidelidadeConfig.recompensa}</b></div>
+    </div>` : '';
+
+  // Endereço salvo
+  const end = clienteData.endereco;
+  const endHTML = end ? `${end.rua}, ${end.numero}${end.comp?', '+end.comp:''} — ${end.bairro}, ${end.cidade}` : 'Nenhum endereço salvo';
+
+  // Histórico (últimos 5)
+  const histHTML = meusPedidos.length === 0
+    ? `<div style="color:#aaa;font-size:.83rem;text-align:center;padding:12px 0;">Nenhum pedido ainda 🛒</div>`
+    : meusPedidos.slice(0,5).map(p=>`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;">
+        <div>
+          <div style="font-weight:800;font-size:.85rem;color:#333;">#${p.num} — ${new Date(p.createdAt).toLocaleDateString('pt-BR')}</div>
+          <div style="font-size:.75rem;color:#888;margin-top:1px;">${(p.itens||[]).map(i=>i.qty+'x '+i.name).join(', ')}</div>
+          <div style="font-size:.75rem;color:#7B2D52;font-weight:700;margin-top:1px;">${fmt(p.total+(p.taxaEntrega||0))} · ${p.status==='entregue'?'✅ Entregue':p.status==='recusado'?'❌ Recusado':'⏳ Em andamento'}</div>
+        </div>
+        <button onclick="repetirPedido('${p.id}')" style="background:#fdf3f7;border:1.5px solid #f0c0d4;border-radius:12px;padding:6px 10px;font-size:.72rem;font-weight:800;cursor:pointer;color:#7B2D52;font-family:'Nunito',sans-serif;white-space:nowrap;flex-shrink:0;">🔁 Repetir</button>
+      </div>`).join('');
+
+  el.innerHTML = `
+    ${fidHTML}
+    <div style="background:#f7f3f0;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:.72rem;font-weight:800;letter-spacing:1px;color:#7B2D52;margin-bottom:10px;">👤 MEUS DADOS</div>
+      <div id="perfilDadosView">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div>
+            <div style="font-weight:800;font-size:.9rem;">${clienteData.nome||clientUser.nome}</div>
+            <div style="font-size:.78rem;color:#888;">${clienteData.tel||clientUser.tel}</div>
+          </div>
+          <button onclick="editarDadosPerfil()" style="background:var(--pink-dark);color:white;border:none;border-radius:10px;padding:6px 12px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">✏️ Editar</button>
+        </div>
+        <div style="font-size:.78rem;color:#555;background:white;border-radius:8px;padding:8px 10px;margin-top:6px;">
+          <span style="font-weight:700;color:#7B2D52;">📍 Endereço:</span> ${endHTML}
+        </div>
+      </div>
+    </div>
+    <div style="background:#f7f3f0;border-radius:14px;padding:14px 16px;">
+      <div style="font-size:.72rem;font-weight:800;letter-spacing:1px;color:#7B2D52;margin-bottom:10px;">🎂 MEU HISTÓRICO (${meusPedidos.length} pedido${meusPedidos.length!==1?'s':''})</div>
+      ${histHTML}
+      ${meusPedidos.length>5?`<div style="text-align:center;margin-top:8px;"><button onclick="closePerfil();openTrackingPage();" style="background:none;border:none;color:#7B2D52;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.82rem;">Ver todos os pedidos →</button></div>`:''}
+    </div>
+    <div style="height:20px;"></div>`;
+}
+
+function editarDadosPerfil(){
+  if(!clientUser) return;
+  get(ref(db,'clientes/'+clientUser.uid)).then(snap=>{
+    const d = snap.val()||{};
+    const end = d.endereco||{};
+    document.getElementById('perfilDadosView').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <input type="text" id="editNome" class="field-inp" placeholder="Nome completo" value="${d.nome||''}" style="font-size:.85rem;padding:9px 12px;">
+        <input type="tel" id="editTel" class="field-inp" placeholder="Telefone" value="${d.tel||''}" style="font-size:.85rem;padding:9px 12px;">
+        <div style="font-size:.75rem;font-weight:800;color:#7B2D52;margin-top:4px;">📍 ENDEREÇO</div>
+        <input type="text" id="editRua" class="field-inp" placeholder="Rua / Avenida" value="${end.rua||''}" style="font-size:.85rem;padding:9px 12px;">
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="editNumero" class="field-inp" placeholder="Número" value="${end.numero==='S/N'?'':end.numero||''}" style="font-size:.85rem;padding:9px 12px;flex:1;">
+          <input type="text" id="editComp" class="field-inp" placeholder="Complemento" value="${end.comp||''}" style="font-size:.85rem;padding:9px 12px;flex:1;">
+        </div>
+        <input type="text" id="editBairro" class="field-inp" placeholder="Bairro" value="${end.bairro||''}" style="font-size:.85rem;padding:9px 12px;">
+        <input type="text" id="editCidade" class="field-inp" placeholder="Cidade" value="${end.cidade||'Juazeiro do Norte'}" style="font-size:.85rem;padding:9px 12px;">
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button onclick="salvarDadosPerfil()" style="flex:2;background:var(--pink-dark);color:white;border:none;border-radius:12px;padding:11px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">✅ Salvar</button>
+          <button onclick="renderPerfil()" style="flex:1;background:#eee;color:#555;border:none;border-radius:12px;padding:11px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">Cancelar</button>
+        </div>
+      </div>`;
+  });
+}
+
+async function salvarDadosPerfil(){
+  const nome = document.getElementById('editNome').value.trim();
+  const tel = document.getElementById('editTel').value.trim();
+  if(!nome||!tel){ alert('Nome e telefone são obrigatórios.'); return; }
+  const rua = document.getElementById('editRua').value.trim();
+  const numero = document.getElementById('editNumero').value.trim()||'S/N';
+  const comp = document.getElementById('editComp').value.trim();
+  const bairro = document.getElementById('editBairro').value.trim();
+  const cidade = document.getElementById('editCidade').value.trim();
+  // Atualiza no Firebase
+  const snap = await get(ref(db,'clientes/'+clientUser.uid));
+  const d = snap.val()||{};
+  await set(ref(db,'clientes/'+clientUser.uid), {
+    ...d, nome, tel,
+    endereco: {rua, numero, comp, bairro, cidade}
+  });
+  // Atualiza sessão local
+  clientUser.nome = nome;
+  clientUser.tel = tel;
+  localStorage.setItem('so_client', JSON.stringify(clientUser));
+  updateClientBar();
+  renderPerfil();
+}
+
+function repetirPedido(pedidoId){
+  // Busca o pedido e adiciona os itens ao carrinho
+  get(ref(db,'pedidos/'+pedidoId)).then(snap=>{
+    const p = snap.val();
+    if(!p){ alert('Pedido não encontrado.'); return; }
+    cart = (p.itens||[]).map(i=>({
+      name:i.name, qty:i.qty, price:i.price,
+      opts:i.opts||[], obs:i.obs||'',
+      emoji:'🍬'
+    }));
+    closePerfil();
+    openCart();
+  });
+}
+
+// ===== IMPRIMIR COMANDA =====
+function imprimirComanda(pedidoId){
+  const p = pedidosData[pedidoId];
+  if(!p) return;
+
+  const data = new Date(p.createdAt);
+  const dataStr = data.toLocaleDateString('pt-BR');
+  const horaStr = data.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const taxaEntrega = p.taxaEntrega||0;
+  const totalFinal = p.total + taxaEntrega;
+
+  const itensHTML = (p.itens||[]).map(item=>`
+    <tr>
+      <td style="padding:4px 6px 4px 0;vertical-align:top;">${item.qty}</td>
+      <td style="padding:4px 6px;vertical-align:top;">
+        ${item.name}
+        ${item.opts&&item.opts.length?`<br><span style="font-size:11px;color:#555;">${item.opts.join(', ')}</span>`:''}
+        ${item.obs?`<br><span style="font-size:11px;color:#c04a00;">Obs: ${item.obs}</span>`:''}
+      </td>
+      <td style="padding:4px 0 4px 6px;text-align:right;vertical-align:top;white-space:nowrap;">${fmt(item.price*item.qty)}</td>
+    </tr>`).join('');
+
+  const enderecoSection = p.entrega==="entrega" ? `
+    <div class="secao">
+      <div class="titulo">Endereço de entrega</div>
+      <div>${p.endereco||''}</div>
+    </div>
+    <div class="tracejado"></div>` : `
+    <div class="secao" style="text-align:center;">
+      <div class="titulo">Retirada no local</div>
+      <div style="font-size:11px;color:#555;">O cliente vai buscar o pedido</div>
+    </div>
+    <div class="tracejado"></div>`;
+
+  const totalSection = p.entrega==="entrega" ? `
+    <tr><td>Itens do pedido</td><td style="text-align:right;">${fmt(p.total)}</td></tr>
+    <tr><td>Taxa de entrega</td><td style="text-align:right;">${taxaEntrega>0?fmt(taxaEntrega):'A combinar'}</td></tr>
+    <tr style="font-weight:700;border-top:1px solid #111;">
+      <td style="padding-top:5px;">Subtotal</td>
+      <td style="text-align:right;padding-top:5px;">${fmt(totalFinal)}</td>
+    </tr>` : `
+    <tr style="font-weight:700;">
+      <td>Total</td>
+      <td style="text-align:right;">${fmt(p.total)}</td>
+    </tr>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Comanda #${p.num}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #111;
+    width: 300px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  .cabecalho {
+    text-align: center;
+    border-bottom: 1px solid #111;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+  .cabecalho .nome-loja { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+  .cabecalho .sub { font-size: 11px; color: #555; margin-top: 2px; }
+  .cabecalho .num-pedido { font-size: 18px; font-weight: 700; margin-top: 6px; }
+  .secao { margin-bottom: 10px; }
+  .titulo { font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .tracejado { border-top: 1px dashed #aaa; margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; }
+  td { vertical-align: top; }
+  .header-row td { font-size: 10px; color: #555; padding-bottom: 4px; }
+  .rodape { text-align: center; font-size: 11px; color: #555; }
+  @media print {
+    body { padding: 0; }
+    @page { margin: 8mm; size: 80mm auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cabecalho">
+  <div class="nome-loja">SWEET OLIVIA</div>
+  <div class="sub">Doces Gourmet · Juazeiro do Norte</div>
+  <div class="num-pedido">Pedido #${p.num}</div>
+</div>
+
+<div class="secao">
+  <div class="titulo">Cliente</div>
+  <div>Nome: ${p.nome}</div>
+  <div>Telefone: ${p.tel}</div>
+</div>
+<div class="tracejado"></div>
+
+${enderecoSection}
+
+<div class="secao">
+  <div class="titulo">Itens do pedido</div>
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:#555;margin-bottom:4px;">
+    <span>Data: ${dataStr}</span><span>Hora: ${horaStr}</span>
+  </div>
+  <table>
+    <tr class="header-row">
+      <td style="width:28px;">Qtd</td>
+      <td>Itens</td>
+      <td style="text-align:right;">Preço</td>
+    </tr>
+    ${itensHTML}
+  </table>
+</div>
+<div class="tracejado"></div>
+
+<div class="secao">
+  <table>
+    ${totalSection}
+  </table>
+</div>
+<div class="tracejado"></div>
+
+<div class="secao">
+  <div class="titulo">Forma de pagamento</div>
+  <table>
+    <tr>
+      <td>${p.pagamento}</td>
+      <td style="text-align:right;">${fmt(totalFinal)}</td>
+    </tr>
+  </table>
+</div>
+<div class="tracejado"></div>
+
+<div class="rodape">Obrigada pela preferência!</div>
+
+<script>window.onload=function(){ window.print(); }<\/script>
+</body>
+</html>`;
+
+  const win = window.open('','_blank','width=400,height=700');
+  if(win){
+    win.document.write(html);
+    win.document.close();
+  }
+}
+
 Object.assign(window,{
   goTo,openItem,closeItem,chQty,selComp,addCart,concluir,
   openCart,closeCart,cqty,goCheckout,closeCheckout,selEntrega,selPag,enviar,toggleSemNumero,showTrackingModal,copiarPix,atualizarQRCode,atualizarAvisoEntrega,calcularTaxaEntrega,resetarTaxa,
@@ -2982,6 +3328,7 @@ Object.assign(window,{
   applyPascoaBanner,pascoaGoTo,
   apagarPedido,
   voltarListaPedidos,
+  imprimirComanda,
   setStatus,openCustomClosed,closeCustomClosed,applyCustomClosed,
   openLogin,closeLogin,checkLogin,openAdmin,closeAdmin,aTab,
   renderAdminProds,togCat,openEdit,openAdd,closeEdit,saveEdit,deleteProd,
@@ -2990,7 +3337,8 @@ Object.assign(window,{
   saveHorario,saveConfig,loadConfigUI,renderStats,clearStats,atualizarHorarioUI,
   loadPedidos,renderKanban,updatePedidoStatus,criarPedidoFake,salvarTaxa,
   iniciarEscutaPedidos,notificarNovoPedido,
-  shareMenu,showClosed,closeClosedPopup
+  shareMenu,showClosed,closeClosedPopup,
+  openPerfil,closePerfil,renderPerfil,editarDadosPerfil,salvarDadosPerfil,repetirPedido
 });
 
 // ===== INIT =====
