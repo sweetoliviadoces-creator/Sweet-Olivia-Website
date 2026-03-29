@@ -632,10 +632,11 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
     <h3>Área Restrita</h3>
-    <p>Digite a senha para continuar</p>
-    <p class="login-error" id="loginError">Senha incorreta.</p>
+    <p>Entre com seu e-mail e senha de administrador</p>
+    <p class="login-error" id="loginError" style="display:none;">E-mail ou senha incorretos.</p>
+    <input type="email" id="loginEmail" class="field-inp" placeholder="E-mail" style="margin-bottom:10px;" onkeydown="if(event.key==='Enter')checkLogin()">
     <input type="password" id="loginInput" placeholder="Senha" onkeydown="if(event.key==='Enter')checkLogin()">
-    <button class="btn-login" onclick="checkLogin()">Entrar</button>
+    <button class="btn-login" onclick="checkLogin()" id="btnAdminLogin">Entrar</button>
     <button class="btn-login-cancel" onclick="closeLogin()">Cancelar</button>
   </div>
 </div>
@@ -942,8 +943,9 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const ADMIN_PASS="88182658Benicio",WA_DEFAULT="5588988392203";
+const WA_DEFAULT="5588988392203";
 let MIN=20, WA=WA_DEFAULT;
 let pixKey="sweetoliviadoces@gmail.com";
 let openHour=12, closeHour=21;
@@ -1662,11 +1664,35 @@ function setStatus(val){
 }
 
 // ===== LOGIN/ADMIN =====
-function openLogin(){document.getElementById("loginOverlay").classList.add("open");document.getElementById("loginInput").value="";document.getElementById("loginError").style.display="none";setTimeout(()=>document.getElementById("loginInput").focus(),80);}
+function openLogin(){
+  document.getElementById("loginOverlay").classList.add("open");
+  document.getElementById("loginInput").value="";
+  const emailEl = document.getElementById("loginEmail");
+  if(emailEl) emailEl.value="";
+  document.getElementById("loginError").style.display="none";
+  setTimeout(()=>document.getElementById("loginEmail")?.focus(),80);
+}
 function closeLogin(){document.getElementById("loginOverlay").classList.remove("open");}
-function checkLogin(){
-  if(document.getElementById("loginInput").value===ADMIN_PASS){closeLogin();openAdmin();}
-  else{document.getElementById("loginError").style.display="block";document.getElementById("loginInput").value="";}
+async function checkLogin(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginInput").value;
+  const errEl = document.getElementById("loginError");
+  const btn = document.getElementById("btnAdminLogin");
+  if(!email||!pass){ errEl.textContent="Preencha e-mail e senha."; errEl.style.display="block"; return; }
+  btn.textContent="Entrando..."; btn.disabled=true;
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    closeLogin();
+    openAdmin();
+  } catch(e){
+    errEl.textContent="E-mail ou senha incorretos.";
+    errEl.style.display="block";
+  }
+  btn.textContent="Entrar"; btn.disabled=false;
+}
+function adminLogout(){
+  signOut(auth).catch(()=>{});
+  closeAdmin();
 }
 // ===== CONFIG =====
 function saveHorario(){
@@ -2812,6 +2838,18 @@ const firebaseConfig = {
 };
 const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+
+// Monitora estado de autenticação do admin
+onAuthStateChanged(auth, user => {
+  if(user){
+    // Admin logado — garante que o admin está aberto se estava esperando
+    const adminEl = document.getElementById('adminOverlay');
+    if(adminEl && adminEl.classList.contains('open')){
+      renderAdminProds(); renderAdminCats(); loadConfigUI(); renderStats();
+    }
+  }
+});
 
 function fbSave(){
   const data = {
@@ -3226,31 +3264,31 @@ function imprimirComanda(pedidoId){
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Courier New', monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: #111;
-    width: 300px;
+    width: 200px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 10px;
   }
   .cabecalho {
     text-align: center;
     border-bottom: 1px solid #111;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
   }
-  .cabecalho .nome-loja { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
-  .cabecalho .sub { font-size: 11px; color: #555; margin-top: 2px; }
-  .cabecalho .num-pedido { font-size: 18px; font-weight: 700; margin-top: 6px; }
-  .secao { margin-bottom: 10px; }
-  .titulo { font-weight: 700; text-align: center; margin-bottom: 4px; }
-  .tracejado { border-top: 1px dashed #aaa; margin-bottom: 10px; }
+  .cabecalho .nome-loja { font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  .cabecalho .sub { font-size: 10px; color: #555; margin-top: 2px; }
+  .cabecalho .num-pedido { font-size: 16px; font-weight: 700; margin-top: 5px; }
+  .secao { margin-bottom: 8px; }
+  .titulo { font-weight: 700; text-align: center; margin-bottom: 3px; }
+  .tracejado { border-top: 1px dashed #aaa; margin-bottom: 8px; }
   table { width: 100%; border-collapse: collapse; }
   td { vertical-align: top; }
-  .header-row td { font-size: 10px; color: #555; padding-bottom: 4px; }
-  .rodape { text-align: center; font-size: 11px; color: #555; }
+  .header-row td { font-size: 9px; color: #555; padding-bottom: 3px; }
+  .rodape { text-align: center; font-size: 10px; color: #555; }
   @media print {
     body { padding: 0; }
-    @page { margin: 8mm; size: 80mm auto; }
+    @page { margin: 4mm; size: 56mm auto; }
   }
 </style>
 </head>
@@ -3330,7 +3368,7 @@ Object.assign(window,{
   voltarListaPedidos,
   imprimirComanda,
   setStatus,openCustomClosed,closeCustomClosed,applyCustomClosed,
-  openLogin,closeLogin,checkLogin,openAdmin,closeAdmin,aTab,
+  openLogin,closeLogin,checkLogin,adminLogout,openAdmin,closeAdmin,aTab,
   renderAdminProds,togCat,openEdit,openAdd,closeEdit,saveEdit,deleteProd,
   handlePhotoUpload,removePhoto,addComp,toggleMinimize,
   renderAdminCats,openAddCat,openEditCat,closeCatModal,saveCat,deleteCat,moveCat,togCatHidden,
