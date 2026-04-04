@@ -3017,6 +3017,8 @@ onAuthStateChanged(auth, user => {
 });
 
 function fbSave(){
+  // Só salva se o admin estiver autenticado
+  if(!auth || !auth.currentUser) return;
   const data = {
     status,
     customClosedMsg,
@@ -3115,7 +3117,8 @@ function fbLoad(){
       updateBadge();
       if(!isOpen()) showClosed();
     } else {
-      fbSave(); // first time: write defaults
+      // Sem dados no Firebase — não faz nada, aguarda admin logar para salvar
+      renderAll();
     }
     // Carrega populares e avaliações em paralelo
     Promise.all([
