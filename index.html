@@ -75,7 +75,7 @@ footer{background:var(--pink);color:white;text-align:center;padding:28px 20px;ma
 .back-to-top.visible{opacity:1;pointer-events:auto;}
 .back-to-top:hover{transform:translateY(-2px);}
 .back-to-top svg{display:block;}
-footer h3{font-family:"Playfair Display",serif;font-size:1.15rem;margin-bottom:8px;cursor:pointer;user-select:none;}
+footer h3{font-family:"Playfair Display",serif;font-size:1.15rem;margin-bottom:8px;user-select:none;}
 footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 .footer-btns{display:flex;justify-content:center;gap:12px;margin-top:16px;flex-wrap:wrap;}
 .footer-btn{display:flex;align-items:center;gap:6px;padding:10px 18px;border-radius:30px;font-size:.85rem;font-weight:800;cursor:pointer;border:none;text-decoration:none;font-family:"Nunito",sans-serif;}
@@ -457,7 +457,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
   <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7B2D52" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
   </button>
-  <h3 onclick="openLogin()">Sweet Olivia Doces Gourmet</h3>
+  <h3 id="adminTrigger" style="cursor:default;user-select:none;">Sweet Olivia Doces Gourmet</h3>
   <p>Juazeiro do Norte, CE</p>
   <p>Das 12h às 21h</p>
   <div class="footer-btns">
@@ -598,7 +598,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
         <div style="font-size:.78rem;font-weight:800;color:#2e7d32;letter-spacing:1px;margin-bottom:8px;">🔑 CHAVE PIX</div>
         <div style="font-size:.82rem;color:#555;font-weight:700;margin-bottom:6px;">Copie a chave abaixo:</div>
         <div style="display:flex;align-items:center;gap:6px;background:white;border:1.5px solid #c8e6c9;border-radius:10px;padding:8px 12px;margin-bottom:10px;">
-          <span id="pixKeyDisplay" style="font-size:.88rem;font-weight:800;color:#1b5e20;flex:1;word-break:break-all;">sweetoliviadoces@gmail.com</span>
+          <span id="pixKeyDisplay" style="font-size:.88rem;font-weight:800;color:#1b5e20;flex:1;word-break:break-all;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="88fbffededfce7e4e1fee1e9ece7ebedfbc8efe5e9e1e4a6ebe7e5">[email&#160;protected]</a></span>
           <button onclick="copiarPix()" style="background:#25D366;color:white;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;">📋 Copiar</button>
         </div>
         <div id="pixDeliveryNote" style="display:none;border-radius:8px;padding:8px 11px;font-size:.78rem;font-weight:700;margin-bottom:8px;line-height:1.5;background:#fff3e0;color:#e65100;">
@@ -608,9 +608,36 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
           ⚠️ Após pagar, envie o comprovante pelo WhatsApp!
         </div>
       </div>
-      <div class="checkout-total-bar">
-        <span>Total:</span>
-        <span class="checkout-total-val" id="coTotal">R$ 0,00</span>
+      <!-- CUPOM -->
+      <div style="margin-top:16px;">
+        <label class="field-lbl">🎟️ Cupom de desconto</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="coCupom" class="field-inp" placeholder="Digite seu código"
+            style="text-transform:uppercase;flex:1;font-weight:800;letter-spacing:1px;"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();aplicarCupom();}">
+          <button onclick="aplicarCupom()" id="btnAplicarCupom"
+            style="background:var(--pink-dark);color:white;border:none;border-radius:12px;padding:0 16px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;flex-shrink:0;">
+            Aplicar
+          </button>
+        </div>
+        <div id="cupomFeedback" style="display:none;margin-top:7px;border-radius:10px;padding:8px 12px;font-size:.8rem;font-weight:700;"></div>
+      </div>
+
+      <div class="checkout-total-bar" style="flex-direction:column;align-items:stretch;gap:4px;padding:12px 20px;">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;color:#888;">
+          <span>Subtotal</span><span id="coSubtotal">R$ 0,00</span>
+        </div>
+        <div id="coEntregaRow" style="display:none;justify-content:space-between;font-size:.85rem;color:#888;">
+          <span>🛵 Entrega</span><span id="coEntregaVal">R$ 0,00</span>
+        </div>
+        <div id="coDescontoRow" style="display:none;justify-content:space-between;font-size:.85rem;color:#2e7d32;font-weight:800;">
+          <span id="coDescontoLabel">Desconto</span><span id="coDescontoVal">- R$ 0,00</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1rem;color:var(--navy);border-top:1px solid #eee;padding-top:6px;margin-top:2px;">
+          <span>Total</span>
+          <span class="checkout-total-val" id="coTotal">R$ 0,00</span>
+        </div>
       </div>
     </div>
     <div class="checkout-foot">
@@ -675,6 +702,8 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       <button class="admin-tab" onclick="aTab('categorias',this)">📂 Categorias</button>
       <button class="admin-tab" onclick="aTab('config',this)">⚙️ Config</button>
       <button class="admin-tab" onclick="aTab('stats',this)">📊 Stats</button>
+      <button class="admin-tab" onclick="aTab('clientes',this)">👥 Clientes</button>
+      <button class="admin-tab" onclick="aTab('cupons',this)">🎟️ Cupons</button>
       <button class="admin-tab" onclick="aTab('pedidos',this)">🛒 Pedidos</button>
     </div>
     <div class="admin-body">
@@ -874,14 +903,68 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       </div>
 
       <div class="admin-sec" id="atab-pedidos">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-          <div style="font-size:.75rem;font-weight:800;color:#aaa;letter-spacing:1px;">PEDIDOS EM ABERTO</div>
-          <div style="display:flex;gap:8px;">
-            <button onclick="criarPedidoFake()" style="background:#fff3e0;border:1.5px solid #ffcc80;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:800;color:#e65100;cursor:pointer;font-family:'Nunito',sans-serif;">🧪 Pedido teste</button>
-            <button onclick="loadPedidos()" style="background:none;border:1.5px solid #eee;border-radius:20px;padding:5px 12px;font-size:.75rem;font-weight:800;color:#888;cursor:pointer;font-family:'Nunito',sans-serif;">↻ Atualizar</button>
+        <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #f0ece8;padding-bottom:0;">
+          <button id="ptab-btn-ativos" onclick="pedidosSubTab('ativos')"
+            style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#7B2D52;border-bottom:2px solid #7B2D52;margin-bottom:-2px;">🔴 Ativos</button>
+          <button id="ptab-btn-historico" onclick="pedidosSubTab('historico')"
+            style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;">📋 Histórico</button>
+          <div style="flex:1;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding-bottom:6px;">
+            <button onclick="criarPedidoFake()" style="background:#fff3e0;border:1.5px solid #ffcc80;border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:800;color:#e65100;cursor:pointer;font-family:'Nunito',sans-serif;">🧪 Teste</button>
+            <button onclick="loadPedidos();renderHistorico();" style="background:none;border:1.5px solid #eee;border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:800;color:#888;cursor:pointer;font-family:'Nunito',sans-serif;">↻</button>
           </div>
         </div>
-        <div id="kanbanBoard" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <div id="ptab-ativos">
+          <div id="kanbanBoard" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+        <div id="ptab-historico" style="display:none;">
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+            <input type="text" id="histBusca" placeholder="Buscar nome, #número ou telefone..." oninput="renderHistorico()"
+              style="flex:1;min-width:180px;border:1.5px solid #eee;border-radius:20px;padding:8px 14px;font-size:.82rem;font-family:'Nunito',sans-serif;outline:none;">
+            <select id="histFiltroStatus" onchange="renderHistorico()"
+              style="border:1.5px solid #eee;border-radius:20px;padding:8px 12px;font-size:.78rem;font-family:'Nunito',sans-serif;outline:none;font-weight:700;color:#555;">
+              <option value="">Todos os status</option>
+              <option value="entregue">✅ Entregues</option>
+              <option value="recusado">❌ Recusados</option>
+              <option value="aguardando">⏳ Aguardando</option>
+              <option value="preparando">🍳 Preparando</option>
+              <option value="enviado">🛵 Enviado</option>
+            </select>
+          </div>
+          <div id="histResumo" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;"></div>
+          <div id="historicoPedidos"></div>
+        </div>
+      </div>
+
+      <div class="admin-sec" id="atab-clientes">
+        <div class="admin-card" style="margin-bottom:12px;">
+          <div class="admin-card-title">👥 Clientes Cadastrados</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="clienteSearch" placeholder="Buscar por nome ou telefone..." oninput="renderAdminClientes()"
+              style="flex:1;min-width:180px;border:1.5px solid #eee;border-radius:20px;padding:8px 14px;font-size:.85rem;font-family:'Nunito',sans-serif;outline:none;">
+            <button onclick="renderAdminClientes()" style="background:none;border:1.5px solid #eee;border-radius:20px;padding:8px 14px;font-size:.75rem;font-weight:800;color:#888;cursor:pointer;font-family:'Nunito',sans-serif;">↻ Atualizar</button>
+          </div>
+        </div>
+        <div id="adminClientesList">
+          <div style="text-align:center;padding:30px;color:#aaa;font-size:.88rem;">Carregando clientes...</div>
+        </div>
+      </div>
+
+      <div class="admin-sec" id="atab-cupons">
+        <div style="margin-bottom:12px;">
+          <div style="font-size:.9rem;font-weight:800;color:#333;margin-bottom:6px;">🎟️ Cupons de Desconto</div>
+          <div style="font-size:.78rem;color:#888;margin-bottom:12px;">Crie cupons com regras de desconto, validade e limite de usos.</div>
+          <button onclick="window.abrirModalCupom()"
+            style="width:100%;background:#7B2D52;color:white;border:none;border-radius:12px;padding:13px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-bottom:14px;">
+            ＋ Criar novo cupom
+          </button>
+          <button onclick="window.renderAdminCupons()"
+            style="width:100%;background:none;border:1.5px solid #eee;border-radius:12px;padding:9px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#888;">
+            ↻ Atualizar lista
+          </button>
+        </div>
+        <div id="adminCuponsList" style="margin-top:4px;">
+          <div style="text-align:center;padding:24px;color:#aaa;font-size:.85rem;">Clique em "Atualizar lista" para carregar.</div>
+        </div>
       </div>
 
     </div>
@@ -971,7 +1054,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
   </div>
 </div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -1134,6 +1217,141 @@ const photoData = {
 // ===== UTILS =====
 const fmt=p=>"R$ "+p.toFixed(2).replace(".",",");
 const cartTotal=()=>cart.reduce((s,i)=>s+i.price*i.qty,0);
+let cupomAplicado = null; // {codigo, tipo, valor, desconto}
+
+function calcularDesconto(subtotal){
+  if(!cupomAplicado) return 0;
+  const c = cupomAplicado;
+  if(c.tipo==='percentual') return Math.min(subtotal, Math.round(subtotal * c.valor / 100 * 100) / 100);
+  return Math.min(subtotal, c.valor);
+}
+
+function atualizarTotaisCheckout(){
+  const subtotal = cartTotal();
+  const desconto = calcularDesconto(subtotal);
+  const taxa = (entrega==='entrega' && taxaCalculada) ? taxaCalculada : 0;
+  // Ordem correta: subtotal → entrega → desconto → total
+  const total = subtotal + taxa - desconto;
+
+  const subEl = document.getElementById('coSubtotal');
+  const totalEl = document.getElementById('coTotal');
+  const entregaRow = document.getElementById('coEntregaRow');
+  const entregaVal = document.getElementById('coEntregaVal');
+  const descontoRow = document.getElementById('coDescontoRow');
+  const descontoVal = document.getElementById('coDescontoVal');
+  const descontoLabel = document.getElementById('coDescontoLabel');
+
+  if(subEl) subEl.textContent = fmt(subtotal);
+
+  // Linha de entrega
+  if(entregaRow){
+    if(taxa > 0){
+      entregaRow.style.display = 'flex';
+      if(entregaVal) entregaVal.textContent = fmt(taxa);
+    } else {
+      entregaRow.style.display = 'none';
+    }
+  }
+
+  // Linha de desconto
+  if(desconto > 0 && descontoRow){
+    descontoRow.style.display = 'flex';
+    if(descontoVal) descontoVal.textContent = '- ' + fmt(desconto);
+    if(descontoLabel) descontoLabel.textContent = 'Cupom ' + (cupomAplicado?.codigo||'');
+  } else if(descontoRow){
+    descontoRow.style.display = 'none';
+  }
+
+  // Total
+  if(totalEl){
+    if(entrega==='entrega' && !taxaCalculada){
+      totalEl.textContent = fmt(subtotal - desconto) + ' + taxa a combinar';
+    } else {
+      totalEl.textContent = fmt(total);
+    }
+  }
+}
+
+async function aplicarCupom(){
+  const codigo = document.getElementById('coCupom')?.value.trim().toUpperCase();
+  const feedback = document.getElementById('cupomFeedback');
+  const btn = document.getElementById('btnAplicarCupom');
+  if(!codigo){ showCupomFeedback('Digite um código de cupom.', false); return; }
+
+  // Se já tem cupom aplicado com mesmo código, remove
+  if(cupomAplicado && cupomAplicado.codigo === codigo){
+    cupomAplicado = null;
+    document.getElementById('coCupom').value = '';
+    showCupomFeedback('Cupom removido.', false);
+    btn.textContent = 'Aplicar';
+    atualizarTotaisCheckout();
+    return;
+  }
+
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  try {
+    const snap = await get(ref(db, 'cupons/' + codigo));
+    const c = snap.val();
+
+    if(!c){ showCupomFeedback('Cupom não encontrado.', false); btn.textContent='Aplicar'; btn.disabled=false; return; }
+    if(!c.ativo){ showCupomFeedback('Este cupom está desativado.', false); btn.textContent='Aplicar'; btn.disabled=false; return; }
+
+    // Validade de data
+    const hoje = new Date().toISOString().split('T')[0];
+    if(c.dataInicio && hoje < c.dataInicio){ showCupomFeedback('Este cupom ainda não está ativo.', false); btn.textContent='Aplicar'; btn.disabled=false; return; }
+    if(c.dataFim && hoje > c.dataFim){ showCupomFeedback('Este cupom está vencido.', false); btn.textContent='Aplicar'; btn.disabled=false; return; }
+
+    // Dia da semana
+    const diaSemana = new Date().getDay();
+    if(c.dias && !c.dias.includes(diaSemana)){ showCupomFeedback('Este cupom não é válido hoje.', false); btn.textContent='Aplicar'; btn.disabled=false; return; }
+
+    // Limite de usos total
+    if(c.limiteUsos > 0 && (c.usos||0) >= c.limiteUsos){ showCupomFeedback('Este cupom já foi esgotado.', false); btn.textContent='Aplicar'; btn.disabled=false; return; }
+
+    // Usos por cliente (pelo telefone)
+    if(c.usosPorCliente > 0){
+      const tel = document.getElementById('coTel')?.value.replace(/\D/g,'');
+      if(tel && c.usadoPor){
+        const usosDoCliente = Object.values(c.usadoPor).filter(t=>t===tel).length;
+        if(usosDoCliente >= c.usosPorCliente){
+          showCupomFeedback('Você já usou este cupom o número máximo de vezes.', false);
+          btn.textContent='Aplicar'; btn.disabled=false; return;
+        }
+      }
+    }
+
+    // Pedido mínimo
+    const subtotal = cartTotal();
+    if(c.minimo > 0 && subtotal < c.minimo){
+      showCupomFeedback('Pedido mínimo para este cupom: ' + fmt(c.minimo) + '.', false);
+      btn.textContent='Aplicar'; btn.disabled=false; return;
+    }
+
+    // Tudo OK — aplica
+    cupomAplicado = { codigo: c.codigo, tipo: c.tipo, valor: c.valor };
+    const desconto = calcularDesconto(subtotal);
+    const txtDesc = c.tipo==='percentual' ? c.valor+'% off' : fmt(c.valor)+' off';
+    showCupomFeedback('✅ Cupom aplicado! ' + txtDesc + (c.descricao ? ' — ' + c.descricao : ''), true);
+    btn.textContent = 'Remover';
+    btn.disabled = false;
+    atualizarTotaisCheckout();
+
+  } catch(e){
+    showCupomFeedback('Erro ao verificar cupom. Tente novamente.', false);
+    btn.textContent='Aplicar'; btn.disabled=false;
+  }
+}
+
+function showCupomFeedback(msg, sucesso){
+  const el = document.getElementById('cupomFeedback');
+  if(!el) return;
+  el.style.display = 'block';
+  el.style.background = sucesso ? '#e8f5e9' : '#ffebee';
+  el.style.color = sucesso ? '#2e7d32' : '#c62828';
+  el.textContent = msg;
+}
 
 // ===== RENDER =====
 function renderAll(){
@@ -1319,7 +1537,11 @@ function goCheckout(){
     return;
   }
   closeCart();
-  document.getElementById("coTotal").textContent=fmt(cartTotal());
+  cupomAplicado = null;
+  document.getElementById('coCupom') && (document.getElementById('coCupom').value='');
+  document.getElementById('cupomFeedback') && (document.getElementById('cupomFeedback').style.display='none');
+  document.getElementById('btnAplicarCupom') && (document.getElementById('btnAplicarCupom').textContent='Aplicar');
+  atualizarTotaisCheckout();
   // Auto-fill if client is logged in
   if(clientUser){
     const nEl=document.getElementById("coNome");
@@ -1374,9 +1596,8 @@ function selEntrega(mode){
   } else {
     dinBtn.style.display="";
   }
-  const base=cartTotal();
-  document.getElementById("coTotal").textContent=mode==="entrega"?fmt(base)+" + taxa a combinar":fmt(base);
   if(mode==="retirada") resetarTaxa();
+  atualizarTotaisCheckout();
   if(pag==="PIX") atualizarAvisoEntrega();
 }
 function selPag(mode){
@@ -1418,9 +1639,7 @@ function resetarTaxa(){
   taxaCalculada = null;
   const box = document.getElementById("taxaResultBox");
   if(box) box.style.display = "none";
-  const base = cartTotal();
-  // Só mostra "taxa a combinar" se for entrega
-  document.getElementById("coTotal").textContent = entrega==="entrega" ? fmt(base) + " + taxa a combinar" : fmt(base);
+  atualizarTotaisCheckout();
 }
 
 async function calcularTaxaEntrega(){
@@ -1516,8 +1735,8 @@ function mostrarTaxaSucesso(distKm, taxa){
       <div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span>🛵 Entrega</span><span style="font-weight:700;">${fmt(taxa)}</span></div>
       <div style="display:flex;justify-content:space-between;font-weight:800;font-size:.85rem;color:#1b5e20;border-top:1px solid #e0e0e0;padding-top:5px;margin-top:4px;"><span>Total</span><span>${fmt(totalComTaxa)}</span></div>
     </div>`;
-  // Atualiza total no checkout
-  document.getElementById("coTotal").textContent = fmt(totalComTaxa);
+  // Atualiza total no checkout (usa atualizarTotaisCheckout para incluir desconto cupom)
+  atualizarTotaisCheckout();
   // Atualiza aviso do PIX
   if(pag==="PIX") atualizarAvisoEntrega();
 }
@@ -1535,7 +1754,7 @@ function mostrarTaxaIndisponivel(distKm){
         <div style="font-size:.75rem;color:#555;">Distância de ${distKm.toFixed(1)} km — entre em contato pelo WhatsApp para confirmar a entrega.</div>
       </div>
     </div>`;
-  document.getElementById("coTotal").textContent = fmt(cartTotal()) + " + taxa a combinar";
+  atualizarTotaisCheckout(); // taxa reset fallback;
 }
 
 function mostrarTaxaErro(msg){
@@ -1593,6 +1812,9 @@ function enviar(){
     endereco = `${rua}, ${numero}${comp?", "+comp:""} — ${bairro}, ${cidade}${ref2?" (Ref: "+ref2+")":""}`;
   }
   // Build order object for Firebase
+  const subtotalItens = cartTotal();
+  const desconto = calcularDesconto(subtotalItens);
+  const totalFinal = subtotalItens - desconto; // sem taxa; taxa é adicionada pelo admin depois
   const pedido = {
     id: pedidoId,
     num: orderNum,
@@ -1600,7 +1822,9 @@ function enviar(){
     entrega,
     endereco,
     pagamento: pag,
-    total: cartTotal(),
+    total: totalFinal,
+    desconto: desconto||0,
+    cupom: cupomAplicado ? cupomAplicado.codigo : null,
     taxaEntrega: (entrega==="entrega" && taxaCalculada) ? taxaCalculada : 0,
     status: "aguardando",
     createdAt: Date.now(),
@@ -1612,6 +1836,18 @@ function enviar(){
   // Save to Firebase
   if(typeof set==="function" && typeof ref==="function" && typeof db!=="undefined"){
     set(ref(db,"pedidos/"+pedidoId), pedido).catch(e=>console.error("Pedido save error:",e));
+    // Register coupon usage
+    if(cupomAplicado){
+      const cupRef = ref(db,'cupons/'+cupomAplicado.codigo);
+      get(cupRef).then(snap=>{
+        const c = snap.val();
+        if(!c) return;
+        const novoUsos = (c.usos||0)+1;
+        const usadoPor = c.usadoPor||{};
+        usadoPor[pedidoId] = tel.replace(/\D/g,'');
+        set(cupRef, {...c, usos:novoUsos, usadoPor});
+      }).catch(()=>{});
+    }
     // Save address to client profile if logged in and delivery
     if(clientUser && entrega==="entrega" && endereco){
       const rua = document.getElementById("coRua").value.trim();
@@ -1630,7 +1866,7 @@ function enviar(){
   }
   // Build WhatsApp message
   const taxaMsg = (entrega==="entrega" && taxaCalculada) ? taxaCalculada : 0;
-  const totalFinalMsg = cartTotal() + taxaMsg;
+  const totalFinalMsg = totalFinal + taxaMsg; // itens - desconto + entrega
   let msg=`*Novo Pedido #${orderNum}* - Sweet Olivia\n\n`;
   cart.forEach(item=>{
     msg+=`${item.qty}x ${item.name} — ${fmt(item.price*item.qty)}`;
@@ -1638,7 +1874,13 @@ function enviar(){
     if(item.obs) msg+=`\n  Obs: ${item.obs}`;
     msg+="\n";
   });
-  msg+=`\n*Subtotal:* ${fmt(cartTotal())}`;
+  if(cupomAplicado && desconto>0){
+    msg+=`\n*Subtotal:* ${fmt(cartTotal())}`;
+    msg+=`\n*Cupom ${cupomAplicado.codigo}:* - ${fmt(desconto)}`;
+    msg+=`\n*Total c/ desconto:* ${fmt(totalFinal)}`;
+  } else {
+    msg+=`\n*Subtotal:* ${fmt(totalFinal)}`;
+  }
   msg+=`\n*Pagamento:* ${pag}`;
   if(entrega==="entrega"){
     msg+=`\n*Entrega:* ${endereco}`;
@@ -1650,16 +1892,17 @@ function enviar(){
     }
   } else {
     msg+=`\n*Retirada* no local`;
-    msg+=`\n*Total:* ${fmt(cartTotal())}`;
+    msg+=`\n*Total:* ${fmt(totalFinal)}`;
   }
   msg+=`\n*Tempo de preparo:* 60~120min`;
   msg+=`\n*Cliente:* ${nome} / ${tel}`;
   msg+=`\n*Codigo:* ${pedidoId}`;
   msg+=`\n\nAcompanhe: https://sweetoliviadoces.netlify.app/pedidos.html?id=${pedidoId}`;
   closeCheckout();
-  addOrderToStats(cartTotal());
+  addOrderToStats(totalFinal);
   cart=[];
   taxaCalculada = null;
+  cupomAplicado = null;
   // Show tracking modal
   showTrackingModal(pedidoId, orderNum);
   setTimeout(()=>window.open("https://wa.me/"+WA+"?text="+encodeURIComponent(msg),"_blank"),1000);
@@ -1802,8 +2045,7 @@ function saveConfig(){
   if(fr) fidelidadeConfig.recompensa = fr;
   // Update banner display
   const bannerEl = document.getElementById('mainBanner'); if(bannerEl) bannerEl.style.background = bannerColor; const bannerTxtEl2 = document.getElementById('bannerText'); if(bannerTxtEl2) bannerTxtEl2.innerHTML = bannerText;
-  const pascoa = document.querySelector('.pascoa-card');
-  if(pascoa) pascoa.style.display = showPascoaBanner ? '' : 'none';
+  applyPascoaBanner();
   fbSave();
   alert('✅ Configurações salvas!');
 }
@@ -2049,7 +2291,7 @@ function renderKanban(){
   const concluidos = Object.values(pedidosData)
     .filter(p=>p.status==="entregue"||p.status==="recusado")
     .sort((a,b)=>b.createdAt-a.createdAt)
-    .slice(0,5);
+    .slice(0,3); // Recentes apenas; ver tudo em Histórico
 
   if(!ativos.length && !concluidos.length){
     board.innerHTML=`<div style="text-align:center;padding:30px;color:#aaa;font-size:.88rem;">Nenhum pedido ainda 🛒</div>`;
@@ -2065,7 +2307,7 @@ function renderKanban(){
   }
   if(concluidos.length){
     h += `<div class="kanban-col">
-      <div class="kanban-col-title" style="color:#888;">Recentes Concluídos <span class="kanban-badge">${concluidos.length}</span></div>
+      <div class="kanban-col-title" style="color:#888;">Últimos Concluídos <span class="kanban-badge">${concluidos.length}</span> <button onclick="pedidosSubTab('historico')" style="background:none;border:none;color:#7B2D52;font-size:.7rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">Ver todos →</button></div>
       ${concluidos.map(p=>pedidoCardHTML(p,true)).join("")}
     </div>`;
   }
@@ -2151,15 +2393,23 @@ function salvarTaxa(pedidoId, valor){
 }
 
 // Mensagens de status por WhatsApp para o cliente
+function fmtResumoWA(p){
+  const subtotal = (p.total||0) + (p.desconto||0);
+  let txt = '';
+  if(p.desconto>0) txt += `\nSubtotal: ${fmt(subtotal)}\nCupom ${p.cupom||''}: - ${fmt(p.desconto)}`;
+  if(p.taxaEntrega>0) txt += `\nTaxa de entrega: ${fmt(p.taxaEntrega)}`;
+  txt += `\n*Total: ${fmt((p.total||0)+(p.taxaEntrega||0))}*`;
+  return txt;
+}
 const STATUS_WA_MSG = {
   preparando: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* foi *confirmado* e esta sendo preparado com muito carinho!\n\nAcompanhe em tempo real:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
+    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* foi *confirmado* e esta sendo preparado com muito carinho!${fmtResumoWA(p)}\n\nAcompanhe em tempo real:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
   enviado: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* saiu para entrega! Ja esta a caminho!\n\nAcompanhe:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
+    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* saiu para entrega! Ja esta a caminho!${fmtResumoWA(p)}\n\nAcompanhe:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
   pronto_retirada: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* esta *pronto para retirada*! Pode vir buscar\n\nAcompanhe:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
+    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* esta *pronto para retirada*! Pode vir buscar${fmtResumoWA(p)}\n\nAcompanhe:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
   entregue: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* foi *entregue*! Esperamos que goste muito!\n\nObrigada pela preferencia! Volte sempre!`,
+    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* foi *entregue*! Esperamos que goste muito!${fmtResumoWA(p)}\n\nObrigada pela preferencia! Volte sempre!`,
   recusado: (p) =>
     `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}.\n\nInfelizmente nao conseguimos atender seu pedido *#${p.num}* no momento.\n\nEntre em contato pelo WhatsApp para mais informacoes. Pedimos desculpas!`,
 };
@@ -2352,6 +2602,8 @@ function aTab(name,btn){
     const badge = document.getElementById("pedidoBadge");
     if(badge){ badge.remove(); delete btn.dataset.badge; }
   }
+  if(name==="clientes") renderAdminClientes();
+  if(name==="cupons") renderAdminCupons();
 }
 function renderAdminProds(){
   const search=(document.getElementById("adminSearch")?.value||"").toLowerCase();
@@ -2775,11 +3027,15 @@ function renderTrackingResult(p, pedidoId){
       <div style="display:flex;justify-content:space-between;font-weight:800;padding-top:10px;color:#7B2D52;">
         ${p.entrega==="entrega" ? `
           <div style="width:100%;">
-            <div style="display:flex;justify-content:space-between;font-weight:600;font-size:.82rem;color:#888;margin-bottom:4px;"><span>Subtotal</span><span>${fmt(p.total)}</span></div>
+            <div style="display:flex;justify-content:space-between;font-weight:600;font-size:.82rem;color:#888;margin-bottom:4px;"><span>Subtotal dos itens</span><span>${fmt((p.total||0)+(p.desconto||0))}</span></div>
+            ${p.desconto>0?`<div style="display:flex;justify-content:space-between;font-weight:700;font-size:.82rem;color:#2e7d32;margin-bottom:4px;"><span>🎟️ Cupom ${p.cupom||''}</span><span>- ${fmt(p.desconto)}</span></div>`:''}
             <div style="display:flex;justify-content:space-between;font-weight:600;font-size:.82rem;color:#888;margin-bottom:6px;"><span>🛵 Taxa de entrega</span><span>${p.taxaEntrega>0?fmt(p.taxaEntrega):"A confirmar"}</span></div>
             <div style="display:flex;justify-content:space-between;font-weight:800;font-size:.95rem;color:#7B2D52;border-top:1.5px solid #f0e8e4;padding-top:8px;"><span>Total</span><span>${fmt(p.total+(p.taxaEntrega||0))}</span></div>
           </div>` :
-          `<span>Total</span><span>${fmt(p.total)}</span>`
+          `<div style="width:100%;">
+            ${p.desconto>0?`<div style="display:flex;justify-content:space-between;font-weight:600;font-size:.82rem;color:#888;margin-bottom:4px;"><span>Subtotal</span><span>${fmt((p.total||0)+(p.desconto||0))}</span></div><div style="display:flex;justify-content:space-between;font-weight:700;font-size:.82rem;color:#2e7d32;margin-bottom:6px;"><span>🎟️ Cupom ${p.cupom||""}</span><span>- ${fmt(p.desconto)}</span></div>`:""}
+            <div style="display:flex;justify-content:space-between;font-weight:800;font-size:.95rem;color:#7B2D52;${p.desconto>0?"border-top:1.5px solid #f0e8e4;padding-top:8px;":""}"><span>Total</span><span>${fmt(p.total)}</span></div>
+          </div>`
         }
       </div>
     </div>
@@ -3047,6 +3303,8 @@ function fbLoad(){
   document.getElementById("sectionsContainer").innerHTML =
     "<div style='text-align:center;padding:40px;color:#aaa;font-size:.95rem;font-family:Nunito,sans-serif;'>Carregando cardápio... 🍬</div>";
 
+  let primeiraVez = true;
+
   onValue(ref(db,"cardapio"), snap=>{
     const data = snap.val();
     if(data){
@@ -3056,15 +3314,11 @@ function fbLoad(){
           hidden: cat.hidden||false,
           products: (cat.products||[]).map(p=>({...p,complementos:p.complementos||[]}))
         }));
-        // Firebase é a fonte de verdade para nomes/preços/descrições.
-        // Preserva complementos do código local apenas se o Firebase não tiver nenhum.
         categories = fbCats.map(fbCat => {
           const localCat = categories.find(c => c.id === fbCat.id);
           if (!localCat) return fbCat;
           const mergedProducts = fbCat.products.map(fbP => {
-            // Tenta encontrar o produto local pelo nome (para pegar complementos)
             const localP = localCat.products.find(p => p.name === fbP.name);
-            // Se Firebase não tem complementos mas local tem, usa o local
             if ((!fbP.complementos || fbP.complementos.length === 0) && localP && localP.complementos && localP.complementos.length > 0) {
               return { ...fbP, complementos: localP.complementos };
             }
@@ -3097,7 +3351,6 @@ function fbLoad(){
           if(el) el.src = cfg.logoB64;
           const prev = document.getElementById('cfgLogoPreview');
           if(prev){ prev.src=cfg.logoB64; prev.style.display='block'; }
-          // Atualiza favicon também
           const img2=new Image();
           img2.onload=function(){
             const cv=document.createElement('canvas'); cv.width=64; cv.height=64;
@@ -3107,28 +3360,32 @@ function fbLoad(){
           };
           img2.src=cfg.logoB64;
         }
-        // Apply to site
         const bannerEl = document.getElementById('mainBanner'); if(bannerEl) bannerEl.style.background = bannerColor; const bannerTxtEl = document.getElementById('bannerText'); if(bannerTxtEl) bannerTxtEl.innerHTML = bannerText;
-        const pascoa = document.querySelector('.pascoa-card');
-        if(pascoa) pascoa.style.display = showPascoaBanner ? '' : 'none';
+        applyPascoaBanner();
       }
 
-      // Update status badge
       updateBadge();
       if(!isOpen()) showClosed();
     } else {
-      // Sem dados no Firebase — não faz nada, aguarda admin logar para salvar
+      renderAll();
+      return;
+    }
+
+    if(primeiraVez){
+      primeiraVez = false;
+      // Carrega populares e avaliações apenas na primeira carga
+      Promise.all([
+        get(ref(db,"pedidos")),
+        get(ref(db,"avaliacoesLoja"))
+      ]).then(([snapPed, snapAval])=>{
+        if(snapPed.val()) calcularPopulares(snapPed.val());
+        if(snapAval.val()){ avaliacoesLoja = snapAval.val(); calcularNotaMedia(); }
+        renderAll();
+      }).catch(()=>renderAll());
+    } else {
+      // Atualizações subsequentes: só re-renderiza o cardápio público, nunca mexe no admin
       renderAll();
     }
-    // Carrega populares e avaliações em paralelo
-    Promise.all([
-      get(ref(db,"pedidos")),
-      get(ref(db,"avaliacoesLoja"))
-    ]).then(([snapPed, snapAval])=>{
-      if(snapPed.val()) calcularPopulares(snapPed.val());
-      if(snapAval.val()){ avaliacoesLoja = snapAval.val(); calcularNotaMedia(); }
-      renderAll();
-    }).catch(()=>renderAll());
   }, e=>console.error("Firebase load error:",e));
 }
 
@@ -3178,11 +3435,16 @@ function resetarLogo(){
 // ===== BANNER PROMOCIONAL =====
 function applyPascoaBanner(){
   const card=document.getElementById('pascoaCard');
+  if(!card) return;
+  // Esconde ou mostra
+  card.style.display = showPascoaBanner ? '' : 'none';
+  if(!showPascoaBanner) return;
+  // Aplica conteúdo
   const tagEl=document.getElementById('pascoaTagEl');
   const titleEl=document.getElementById('pascoaTitleEl');
   const subEl=document.getElementById('pascoaSubEl');
   const btnEl=document.getElementById('pascoaBtnEl');
-  if(card) card.style.background=pascoaConfig.color;
+  card.style.background=pascoaConfig.color;
   if(tagEl) tagEl.textContent=pascoaConfig.tag;
   if(titleEl) titleEl.textContent=pascoaConfig.title;
   if(subEl) subEl.textContent=pascoaConfig.sub;
@@ -3297,7 +3559,9 @@ async function renderPerfil(){
         <div>
           <div style="font-weight:800;font-size:.85rem;color:#333;">#${p.num} — ${new Date(p.createdAt).toLocaleDateString('pt-BR')}</div>
           <div style="font-size:.75rem;color:#888;margin-top:1px;">${(p.itens||[]).map(i=>i.qty+'x '+i.name).join(', ')}</div>
-          <div style="font-size:.75rem;color:#7B2D52;font-weight:700;margin-top:1px;">${fmt(p.total+(p.taxaEntrega||0))} · ${p.status==='entregue'?'✅ Entregue':p.status==='recusado'?'❌ Recusado':'⏳ Em andamento'}</div>
+          <div style="font-size:.75rem;color:#7B2D52;font-weight:700;margin-top:1px;">
+            ${p.desconto>0?`<span style="color:#2e7d32;">🎟️ -${fmt(p.desconto)}</span> · `:''}${fmt(p.total+(p.taxaEntrega||0))} · ${p.status==='entregue'?'✅ Entregue':p.status==='recusado'?'❌ Recusado':'⏳ Em andamento'}
+          </div>
         </div>
         <button onclick="repetirPedido('${p.id}')" style="background:#fdf3f7;border:1.5px solid #f0c0d4;border-radius:12px;padding:6px 10px;font-size:.72rem;font-weight:800;cursor:pointer;color:#7B2D52;font-family:'Nunito',sans-serif;white-space:nowrap;flex-shrink:0;">🔁 Repetir</button>
       </div>`).join('');
@@ -3704,6 +3968,119 @@ async function salvarRespostaAdmin(id){
   renderAdminAvaliacoes();
 }
 
+// ===== CLIENTES ADMIN =====
+async function renderAdminClientes(){
+  const el = document.getElementById('adminClientesList');
+  if(!el) return;
+  el.innerHTML = `<div style="text-align:center;padding:24px;color:#aaa;font-size:.85rem;">Carregando...</div>`;
+
+  const [snapClientes, snapPedidos] = await Promise.all([
+    get(ref(db,'clientes')),
+    get(ref(db,'pedidos'))
+  ]);
+
+  const clientes = snapClientes.val()||{};
+  const todosPedidos = Object.values(snapPedidos.val()||{});
+  const cleanTel = s=>(s||'').replace(/\D/g,'');
+  const meta = fidelidadeConfig.pedidosParaRecompensa||5;
+  const valorMin = fidelidadeConfig.valorMinimo||0;
+  const busca = (document.getElementById('clienteSearch')?.value||'').toLowerCase();
+
+  // Agrupa pedidos por telefone (clientes que pediram mas podem não ter conta)
+  const pedidosPorTel = {};
+  todosPedidos.forEach(p=>{
+    const tel = cleanTel(p.tel);
+    if(!tel) return;
+    if(!pedidosPorTel[tel]) pedidosPorTel[tel] = [];
+    pedidosPorTel[tel].push(p);
+  });
+
+  // Clientes com conta cadastrada
+  const listaClientes = Object.entries(clientes).map(([uid, c])=>({uid, ...c, temConta: true}));
+
+  // Adiciona clientes sem conta que fizeram pedido
+  const telsComConta = new Set(listaClientes.map(c=>cleanTel(c.tel)));
+  Object.entries(pedidosPorTel).forEach(([tel, peds])=>{
+    if(telsComConta.has(tel)) return;
+    const p = peds[0];
+    listaClientes.push({uid:null, nome:p.nome, tel:p.tel, temConta:false});
+  });
+
+  // Filtro de busca
+  const filtrados = busca
+    ? listaClientes.filter(c=>(c.nome||'').toLowerCase().includes(busca)||(c.tel||'').includes(busca))
+    : listaClientes;
+
+  filtrados.sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+
+  if(!filtrados.length){
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:#aaa;font-size:.85rem;">Nenhum cliente encontrado.</div>`;
+    return;
+  }
+
+  el.innerHTML = filtrados.map(c=>{
+    const tel = cleanTel(c.tel);
+    const pedidos = (pedidosPorTel[tel]||[]).sort((a,b)=>b.createdAt-a.createdAt);
+    const entregues = pedidos.filter(p=>{
+      if(p.status!=='entregue') return false;
+      if(valorMin>0 && (p.total+(p.taxaEntrega||0))<valorMin) return false;
+      return true;
+    }).length;
+    const progresso = entregues % meta;
+    const ciclos = Math.floor(entregues / meta);
+    const pct = Math.round((progresso/meta)*100);
+    const totalGasto = pedidos.filter(p=>p.status!=='recusado').reduce((s,p)=>s+(p.total+(p.taxaEntrega||0)),0);
+
+    const fidBadge = fidelidadeConfig.ativo ? (ciclos>0
+      ? `<span style="background:#e8f5e9;color:#2e7d32;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:800;margin-left:6px;">🎁 ${ciclos} prêmio${ciclos>1?'s':''} ganho${ciclos>1?'s':''}</span>`
+      : `<span style="background:#fdf3f7;color:#7B2D52;border-radius:10px;padding:2px 8px;font-size:.68rem;font-weight:800;margin-left:6px;">${progresso}/${meta} pedidos</span>`)
+      : '';
+
+    const ultimoPedido = pedidos.length ? new Date(pedidos[0].createdAt).toLocaleDateString('pt-BR') : '—';
+
+    return `<details style="border:1.5px solid #f0ece8;border-radius:14px;margin-bottom:10px;overflow:hidden;">
+      <summary style="list-style:none;padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7B2D52,#F06292);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;">${(c.nome||'?')[0].toUpperCase()}</div>
+          <div style="min-width:0;">
+            <div style="font-weight:800;font-size:.88rem;color:#222;">${c.nome||'Sem nome'}${fidBadge}</div>
+            <div style="font-size:.75rem;color:#888;">${c.tel||'—'} ${c.temConta?'<span style="color:#2e7d32;font-weight:800;">• Conta ativa</span>':'<span style="color:#aaa;">• Sem conta</span>'}</div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-size:.78rem;font-weight:800;color:#7B2D52;">${pedidos.length} pedido${pedidos.length!==1?'s':''}</div>
+          <div style="font-size:.72rem;color:#aaa;">${fmt(totalGasto)}</div>
+        </div>
+      </summary>
+      <div style="padding:12px 14px;background:#fdf9fb;border-top:1px solid #f0ece8;">
+        ${fidelidadeConfig.ativo ? `<div style="background:linear-gradient(135deg,#7B2D52,#F06292);border-radius:10px;padding:10px 14px;color:white;margin-bottom:12px;">
+          <div style="font-size:.68rem;font-weight:800;opacity:.85;margin-bottom:4px;">🎁 FIDELIDADE</div>
+          <div style="font-size:.82rem;font-weight:800;margin-bottom:6px;">${progresso} de ${meta} pedidos · ${ciclos} prêmio${ciclos!==1?'s':''} ganho${ciclos!==1?'s':''}</div>
+          <div style="background:rgba(255,255,255,.3);border-radius:20px;height:7px;overflow:hidden;">
+            <div style="background:white;height:100%;width:${pct}%;border-radius:20px;"></div>
+          </div>
+          <div style="font-size:.7rem;opacity:.85;margin-top:5px;">Recompensa: ${fidelidadeConfig.recompensa}${valorMin>0?` · Mínimo: ${fmt(valorMin)}`:''}</div>
+        </div>` : ''}
+        <div style="font-size:.75rem;color:#888;margin-bottom:10px;">Último pedido: ${ultimoPedido} · Total gasto: <b style="color:#7B2D52;">${fmt(totalGasto)}</b></div>
+        ${pedidos.length===0 ? '<div style="color:#aaa;font-size:.82rem;">Nenhum pedido encontrado.</div>' :
+          pedidos.slice(0,8).map(p=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f5f0f3;font-size:.78rem;">
+            <div>
+              <span style="font-weight:800;color:#333;">#${p.num}</span>
+              <span style="color:#aaa;margin-left:4px;">${new Date(p.createdAt).toLocaleDateString('pt-BR')}</span>
+              <div style="color:#888;margin-top:1px;">${(p.itens||[]).map(i=>i.qty+'x '+i.name).join(', ')}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0;margin-left:8px;">
+              <div style="font-weight:800;color:#7B2D52;">${fmt(p.total+(p.taxaEntrega||0))}</div>
+              <div style="font-size:.7rem;margin-top:1px;">${p.status==='entregue'?'<span style="color:#2e7d32;">✅ Entregue</span>':p.status==='recusado'?'<span style="color:#c62828;">❌ Recusado</span>':'<span style="color:#e65100;">⏳ Em andamento</span>'}</div>
+            </div>
+          </div>`).join('')}
+        ${pedidos.length>8?`<div style="text-align:center;padding-top:8px;font-size:.75rem;color:#aaa;">+ ${pedidos.length-8} pedidos anteriores</div>`:''}
+      </div>
+    </details>`;
+  }).join('');
+}
+
 function togProd(catId, idx, val){
   const cat = categories.find(c=>c.id===catId);
   if(!cat) return;
@@ -3711,6 +4088,325 @@ function togProd(catId, idx, val){
   renderAll();
   renderAdminProds();
   fbSave();
+}
+
+
+// ===== HISTÓRICO DE PEDIDOS =====
+function pedidosSubTab(tab){
+  const ativos = document.getElementById('ptab-ativos');
+  const hist = document.getElementById('ptab-historico');
+  const btnA = document.getElementById('ptab-btn-ativos');
+  const btnH = document.getElementById('ptab-btn-historico');
+  if(tab==='ativos'){
+    ativos.style.display=''; hist.style.display='none';
+    btnA.style.color='#7B2D52'; btnA.style.borderBottom='2px solid #7B2D52';
+    btnH.style.color='#aaa'; btnH.style.borderBottom='2px solid transparent';
+  } else {
+    ativos.style.display='none'; hist.style.display='';
+    btnH.style.color='#7B2D52'; btnH.style.borderBottom='2px solid #7B2D52';
+    btnA.style.color='#aaa'; btnA.style.borderBottom='2px solid transparent';
+    renderHistorico();
+  }
+}
+
+async function renderHistorico(){
+  const el = document.getElementById('historicoPedidos');
+  const resumoEl = document.getElementById('histResumo');
+  if(!el) return;
+
+  // Usa pedidosData já carregados, ou busca do Firebase
+  let todos = Object.values(pedidosData);
+  if(!todos.length){
+    el.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;font-size:.85rem;">Carregando...</div>';
+    const snap = await get(ref(db,'pedidos'));
+    pedidosData = snap.val()||{};
+    todos = Object.values(pedidosData);
+  }
+
+  const busca = (document.getElementById('histBusca')?.value||'').toLowerCase();
+  const filtroStatus = document.getElementById('histFiltroStatus')?.value||'';
+
+  // Aplica filtros
+  let filtrados = todos;
+  if(busca){
+    filtrados = filtrados.filter(p=>
+      (p.nome||'').toLowerCase().includes(busca) ||
+      String(p.num).includes(busca) ||
+      (p.tel||'').includes(busca)
+    );
+  }
+  if(filtroStatus){
+    filtrados = filtrados.filter(p=>p.status===filtroStatus);
+  }
+
+  filtrados.sort((a,b)=>b.createdAt-a.createdAt);
+
+  // Resumo geral
+  const totalEntregues = filtrados.filter(p=>p.status==='entregue').length;
+  const totalRecusados = filtrados.filter(p=>p.status==='recusado').length;
+  const totalValor = filtrados.filter(p=>p.status==='entregue').reduce((s,p)=>s+(p.total+(p.taxaEntrega||0)),0);
+  resumoEl.innerHTML = `
+    <div style="background:#e8f5e9;color:#2e7d32;border-radius:10px;padding:7px 12px;font-size:.75rem;font-weight:800;">✅ ${totalEntregues} entregue${totalEntregues!==1?'s':''}</div>
+    <div style="background:#ffebee;color:#c62828;border-radius:10px;padding:7px 12px;font-size:.75rem;font-weight:800;">❌ ${totalRecusados} recusado${totalRecusados!==1?'s':''}</div>
+    <div style="background:#fdf3f7;color:#7B2D52;border-radius:10px;padding:7px 12px;font-size:.75rem;font-weight:800;">💰 ${fmt(totalValor)} faturado</div>
+    <div style="background:#f5f5f5;color:#555;border-radius:10px;padding:7px 12px;font-size:.75rem;font-weight:800;">📦 ${filtrados.length} total</div>`;
+
+  if(!filtrados.length){
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:#aaa;font-size:.85rem;">Nenhum pedido encontrado.</div>';
+    return;
+  }
+
+  // Agrupa por dia
+  const grupos = {};
+  filtrados.forEach(p=>{
+    const d = new Date(p.createdAt);
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const ontem = new Date(hoje); ontem.setDate(ontem.getDate()-1);
+    const dData = new Date(d); dData.setHours(0,0,0,0);
+    let label;
+    if(dData.getTime()===hoje.getTime()) label = 'Hoje';
+    else if(dData.getTime()===ontem.getTime()) label = 'Ontem';
+    else label = d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
+    label = label.charAt(0).toUpperCase() + label.slice(1);
+    if(!grupos[label]) grupos[label] = [];
+    grupos[label].push(p);
+  });
+
+  const statusCfg = {
+    entregue:   {cor:'#2e7d32', bg:'#e8f5e9', icon:'✅'},
+    recusado:   {cor:'#c62828', bg:'#ffebee', icon:'❌'},
+    aguardando: {cor:'#f57f17', bg:'#fff8e1', icon:'⏳'},
+    preparando: {cor:'#1565c0', bg:'#e3f2fd', icon:'🍳'},
+    enviado:    {cor:'#6a1b9a', bg:'#f3e5f5', icon:'🛵'},
+    pronto_retirada:{cor:'#e65100',bg:'#fff3e0',icon:'🏠'},
+  };
+
+  el.innerHTML = Object.entries(grupos).map(([dia, pedidos])=>{
+    const totalDia = pedidos.filter(p=>p.status==='entregue').reduce((s,p)=>s+(p.total+(p.taxaEntrega||0)),0);
+    const rows = pedidos.map(p=>{
+      const cfg = statusCfg[p.status]||{cor:'#888',bg:'#f5f5f5',icon:'📦'};
+      const hora = new Date(p.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const itensStr = (p.itens||[]).map(i=>`${i.qty}x ${i.name}`).join(', ');
+      const total = p.total+(p.taxaEntrega||0);
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-bottom:1px solid #f5f0f3;">
+        <div style="flex-shrink:0;text-align:center;min-width:36px;">
+          <div style="font-size:.78rem;color:#aaa;font-weight:700;">${hora}</div>
+          <div style="font-size:1rem;margin-top:2px;">${cfg.icon}</div>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-weight:800;font-size:.88rem;color:#222;">#${p.num} — ${p.nome}</span>
+            <span style="background:${cfg.bg};color:${cfg.cor};border-radius:8px;padding:1px 7px;font-size:.68rem;font-weight:800;">${p.status}</span>
+          </div>
+          <div style="font-size:.75rem;color:#888;margin-top:2px;">${p.tel} · ${p.entrega==='entrega'?'🛵 Entrega':'🏠 Retirada'} · ${p.pagamento}</div>
+          <div style="font-size:.75rem;color:#555;margin-top:2px;">${itensStr}</div>
+        </div>
+        <div style="flex-shrink:0;text-align:right;">
+          <div style="font-weight:800;font-size:.88rem;color:#7B2D52;">${fmt(total)}</div>
+          <button onclick="apagarPedido('${p.id}','${p.num}')" title="Apagar"
+            style="background:none;border:none;cursor:pointer;font-size:.8rem;color:#ccc;margin-top:4px;font-family:'Nunito',sans-serif;">🗑</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<details open style="margin-bottom:12px;border:1.5px solid #f0ece8;border-radius:14px;overflow:hidden;">
+      <summary style="list-style:none;background:#fdf9fb;padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-weight:800;font-size:.88rem;color:#7B2D52;">${dia}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:.75rem;color:#888;">${pedidos.length} pedido${pedidos.length!==1?'s':''}</span>
+          ${totalDia>0?`<span style="font-size:.75rem;font-weight:800;color:#2e7d32;">${fmt(totalDia)}</span>`:''}
+        </div>
+      </summary>
+      ${rows}
+    </details>`;
+  }).join('');
+}
+
+
+// ===== CUPONS =====
+let cupomEditId = null;
+
+function abrirModalCupom(id){
+  cupomEditId = id||null;
+  const modal = document.getElementById('cupomOverlay');
+  modal.classList.add('open');
+
+  // Preenche data padrão: hoje até 7 dias
+  const hoje = new Date();
+  const fim = new Date(); fim.setDate(fim.getDate()+7);
+  const toISO = d => d.toISOString().split('T')[0];
+
+  if(!id){
+    document.getElementById('cupomModalTitle').textContent = '🎟️ Novo Cupom';
+    document.getElementById('cupomCodigo').value = '';
+    document.getElementById('cupomValor').value = '';
+    document.getElementById('cupomMinimo').value = '0';
+    document.getElementById('cupomDataInicio').value = toISO(hoje);
+    document.getElementById('cupomDataFim').value = toISO(fim);
+    document.getElementById('cupomLimiteUsos').value = '0';
+    document.getElementById('cupomUsosPorCliente').value = '1';
+    document.getElementById('cupomDescricao').value = '';
+    document.querySelectorAll('#cupomDias input[type=checkbox]').forEach(c=>c.checked=true);
+    document.querySelector('input[name=cupomTipo][value=percentual]').checked = true;
+    toggleTipoCupom();
+    return;
+  }
+
+  // Editar existente
+  get(ref(db,'cupons/'+id)).then(snap=>{
+    const c = snap.val();
+    if(!c) return;
+    document.getElementById('cupomModalTitle').textContent = '✏️ Editar Cupom';
+    document.getElementById('cupomCodigo').value = c.codigo;
+    document.getElementById('cupomCodigo').disabled = true; // não muda o código
+    document.getElementById('cupomValor').value = c.valor;
+    document.getElementById('cupomMinimo').value = c.minimo||0;
+    document.getElementById('cupomDataInicio').value = c.dataInicio||'';
+    document.getElementById('cupomDataFim').value = c.dataFim||'';
+    document.getElementById('cupomLimiteUsos').value = c.limiteUsos||0;
+    document.getElementById('cupomUsosPorCliente').value = c.usosPorCliente||1;
+    document.getElementById('cupomDescricao').value = c.descricao||'';
+    document.querySelector('input[name=cupomTipo][value='+c.tipo+']').checked = true;
+    toggleTipoCupom();
+    const dias = c.dias||[0,1,2,3,4,5,6];
+    document.querySelectorAll('#cupomDias input[type=checkbox]').forEach(cb=>{
+      cb.checked = dias.includes(parseInt(cb.value));
+    });
+  });
+}
+
+function fecharModalCupom(){
+  document.getElementById('cupomOverlay').classList.remove('open');
+  document.getElementById('cupomCodigo').disabled = false;
+}
+
+function toggleTipoCupom(){
+  const tipo = document.querySelector('input[name=cupomTipo]:checked')?.value;
+  document.getElementById('cupomValorLabel').textContent = tipo==='percentual' ? 'Desconto (%) *' : 'Desconto (R$) *';
+  document.getElementById('cupomValor').placeholder = tipo==='percentual' ? '10' : '5.00';
+  document.getElementById('cupomValor').step = tipo==='percentual' ? '1' : '0.50';
+}
+
+async function salvarCupom(){
+  const codigo = document.getElementById('cupomCodigo').value.trim().toUpperCase();
+  const tipo = document.querySelector('input[name=cupomTipo]:checked')?.value||'percentual';
+  const valor = parseFloat(document.getElementById('cupomValor').value)||0;
+  const minimo = parseFloat(document.getElementById('cupomMinimo').value)||0;
+  const dataInicio = document.getElementById('cupomDataInicio').value;
+  const dataFim = document.getElementById('cupomDataFim').value;
+  const limiteUsos = parseInt(document.getElementById('cupomLimiteUsos').value)||0;
+  const usosPorCliente = parseInt(document.getElementById('cupomUsosPorCliente').value)||0;
+  const descricao = document.getElementById('cupomDescricao').value.trim();
+  const dias = Array.from(document.querySelectorAll('#cupomDias input[type=checkbox]'))
+    .filter(c=>c.checked).map(c=>parseInt(c.value));
+
+  if(!codigo){ alert('Digite o código do cupom.'); return; }
+  if(!valor){ alert('Digite o valor do desconto.'); return; }
+  if(!dataInicio||!dataFim){ alert('Defina as datas de validade.'); return; }
+  if(dataFim < dataInicio){ alert('A data fim deve ser após a data início.'); return; }
+  if(!dias.length){ alert('Selecione ao menos um dia da semana.'); return; }
+  if(tipo==='percentual' && valor>100){ alert('Percentual não pode ser maior que 100%.'); return; }
+
+  // Se novo, verifica se código já existe
+  if(!cupomEditId){
+    const snap = await get(ref(db,'cupons/'+codigo));
+    if(snap.val()){ alert('Já existe um cupom com esse código!'); return; }
+  }
+
+  const id = cupomEditId || codigo;
+  const cupom = {
+    codigo, tipo, valor, minimo, dataInicio, dataFim,
+    limiteUsos, usosPorCliente, descricao, dias,
+    ativo: true,
+    usos: cupomEditId ? undefined : 0, // preserva usos ao editar
+    criadoEm: cupomEditId ? undefined : Date.now()
+  };
+  // Remove undefined
+  Object.keys(cupom).forEach(k => cupom[k]===undefined && delete cupom[k]);
+
+  await set(ref(db,'cupons/'+id), cupom);
+  fecharModalCupom();
+  renderAdminCupons();
+}
+
+async function renderAdminCupons(){
+  const el = document.getElementById('adminCuponsList');
+  if(!el){ console.warn('adminCuponsList not found'); return; }
+  el.innerHTML = '<div style="text-align:center;padding:16px;color:#aaa;font-size:.85rem;">Carregando...</div>';
+
+  let todos = {};
+  try {
+    const snap = await get(ref(db,'cupons'));
+    todos = snap.val()||{};
+  } catch(e) {
+    console.error('Erro cupons:', e);
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:#c62828;font-size:.85rem;">Erro ao carregar. Tente novamente.</div>';
+    return;
+  }
+  const lista = Object.entries(todos).sort((a,b)=>(b[1].criadoEm||0)-(a[1].criadoEm||0));
+
+  if(!lista.length){
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:#aaa;font-size:.85rem;">Nenhum cupom criado ainda.</div>';
+    return;
+  }
+
+  const hoje = new Date().toISOString().split('T')[0];
+  const diasNome = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+  el.innerHTML = lista.map(([id, c])=>{
+    const vencido = c.dataFim && c.dataFim < hoje;
+    const naoIniciou = c.dataInicio && c.dataInicio > hoje;
+    const esgotado = c.limiteUsos>0 && (c.usos||0)>=c.limiteUsos;
+    let statusTxt, statusBg, statusCor;
+    if(!c.ativo){ statusTxt='Desativado'; statusBg='#f5f5f5'; statusCor='#999'; }
+    else if(esgotado){ statusTxt='Esgotado'; statusBg='#ffebee'; statusCor='#c62828'; }
+    else if(vencido){ statusTxt='Vencido'; statusBg='#ffebee'; statusCor='#c62828'; }
+    else if(naoIniciou){ statusTxt='Aguardando'; statusBg='#fff3e0'; statusCor='#e65100'; }
+    else { statusTxt='Ativo'; statusBg='#e8f5e9'; statusCor='#2e7d32'; }
+
+    const descontoTxt = c.tipo==='percentual' ? `${c.valor}% off` : `R$ ${c.valor.toFixed(2).replace('.',',')} off`;
+    const minimoTxt = c.minimo>0 ? `Mínimo ${fmt(c.minimo)}` : 'Sem mínimo';
+    const usosTxt = c.limiteUsos>0 ? `${c.usos||0}/${c.limiteUsos} usos` : `${c.usos||0} usos`;
+    const diasTxt = (c.dias||[0,1,2,3,4,5,6]).length===7 ? 'Todos os dias' : (c.dias||[]).map(d=>diasNome[d]).join(', ');
+
+    return `<div style="border:1.5px solid #f0ece8;border-radius:14px;padding:14px 16px;margin-bottom:10px;${!c.ativo||vencido||esgotado?'opacity:.65;':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-family:monospace;font-size:1.05rem;font-weight:800;color:#222;letter-spacing:2px;">${c.codigo}</span>
+            <span style="background:${statusBg};color:${statusCor};border-radius:8px;padding:2px 8px;font-size:.7rem;font-weight:800;">${statusTxt}</span>
+          </div>
+          <div style="font-size:.78rem;color:#7B2D52;font-weight:800;margin-top:3px;">${descontoTxt} · ${minimoTxt}</div>
+          ${c.descricao?`<div style="font-size:.75rem;color:#888;margin-top:2px;">${c.descricao}</div>`:''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;">
+          <button onclick="toggleAtivoCupom('${id}',${!c.ativo})" title="${c.ativo?'Desativar':'Ativar'}"
+            style="background:${c.ativo?'#fff3e0':'#e8f5e9'};color:${c.ativo?'#e65100':'#2e7d32'};border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
+            ${c.ativo?'⏸ Pausar':'▶ Ativar'}</button>
+          <button onclick="abrirModalCupom('${id}')"
+            style="background:#fdf3f7;color:#7B2D52;border:1.5px solid #f0c0d4;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">✏️</button>
+          <button onclick="deletarCupom('${id}')"
+            style="background:#ffebee;color:#c62828;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">🗑</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:.72rem;color:#888;font-weight:700;border-top:1px solid #f5f0f3;padding-top:8px;">
+        <span>📅 ${c.dataInicio||'—'} até ${c.dataFim||'—'}</span>
+        <span>🗓 ${diasTxt}</span>
+        <span>📊 ${usosTxt}${c.usosPorCliente>0?' · '+c.usosPorCliente+'x/cliente':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleAtivoCupom(id, novoValor){
+  await set(ref(db,'cupons/'+id+'/ativo'), novoValor);
+  renderAdminCupons();
+}
+
+async function deletarCupom(id){
+  if(!confirm('Excluir este cupom?')) return;
+  await remove(ref(db,'cupons/'+id));
+  renderAdminCupons();
 }
 
 Object.assign(window,{
@@ -3734,6 +4430,10 @@ Object.assign(window,{
   abrirAvaliacoes,fecharAvaliacoes,selNotaLoja,enviarAvaliacaoLoja,
   aprovarAvaliacaoAdmin,deletarAvaliacaoAdmin,responderAvaliacaoAdmin,salvarRespostaAdmin,
   renderAdminAvaliacoes,togProd,
+  renderAdminClientes,
+  pedidosSubTab,renderHistorico,
+  abrirModalCupom,fecharModalCupom,toggleTipoCupom,salvarCupom,renderAdminCupons,toggleAtivoCupom,deletarCupom,
+  aplicarCupom,atualizarTotaisCheckout,
   loadPedidos,renderKanban,updatePedidoStatus,criarPedidoFake,salvarTaxa,
   iniciarEscutaPedidos,notificarNovoPedido,
   shareMenu,showClosed,closeClosedPopup,
@@ -3762,14 +4462,99 @@ window.renderAll = function(){
   document.querySelectorAll(".section-block").forEach(s=>io.observe(s));
 };
 
+// ===== GATILHO SECRETO DO ADMIN (5 cliques rápidos no nome) =====
+(function(){
+  let clicks = 0, timer = null;
+  document.getElementById('adminTrigger').addEventListener('click', function(){
+    clicks++;
+    clearTimeout(timer);
+    if(clicks >= 2){
+      clicks = 0;
+      openLogin();
+    } else {
+      timer = setTimeout(()=>{ clicks = 0; }, 1200);
+    }
+  });
+})();
+
 fbLoad();
 loadClientSession();
-// Carrega logo e favicon salvos
-(function(){
-  // Logo carregado do Firebase via fbLoad
-})();
-// Atualiza badge automaticamente a cada minuto (para modo "Por horário")
-setInterval(updateBadge, 60000);
 </script>
+
+<!-- CUPOM MODAL -->
+<div class="login-overlay" id="cupomOverlay" style="z-index:9000;">
+  <div class="login-box" style="max-width:440px;max-height:90vh;overflow-y:auto;">
+    <h3 id="cupomModalTitle" style="margin-bottom:16px;">🎟️ Novo Cupom</h3>
+
+    <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Código do cupom *</label>
+    <input type="text" id="cupomCodigo" class="field-inp" placeholder="Ex: BEMVINDA10" maxlength="20"
+      style="text-transform:uppercase;margin-bottom:4px;font-weight:800;letter-spacing:1px;"
+      oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+    <div style="font-size:.72rem;color:#aaa;margin-bottom:12px;">Só letras e números, sem espaço.</div>
+
+    <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:6px;">Tipo de desconto *</label>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <label style="flex:1;border:1.5px solid #eee;border-radius:10px;padding:10px;cursor:pointer;display:flex;align-items:center;gap:8px;" id="tipoPctLabel">
+        <input type="radio" name="cupomTipo" value="percentual" checked onchange="toggleTipoCupom()"> Percentual (%)
+      </label>
+      <label style="flex:1;border:1.5px solid #eee;border-radius:10px;padding:10px;cursor:pointer;display:flex;align-items:center;gap:8px;" id="tipoFixoLabel">
+        <input type="radio" name="cupomTipo" value="fixo" onchange="toggleTipoCupom()"> Valor fixo (R$)
+      </label>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;" id="cupomValorLabel">Desconto (%) *</label>
+        <input type="number" id="cupomValor" class="field-inp" placeholder="10" min="1" step="1">
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Pedido mínimo (R$)</label>
+        <input type="number" id="cupomMinimo" class="field-inp" placeholder="0" min="0" step="1">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Data início *</label>
+        <input type="date" id="cupomDataInicio" class="field-inp">
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Data fim *</label>
+        <input type="date" id="cupomDataFim" class="field-inp">
+      </div>
+    </div>
+
+    <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:6px;">Dias da semana ativos</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="cupomDias">
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="0" checked> Dom</label>
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="1" checked> Seg</label>
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="2" checked> Ter</label>
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="3" checked> Qua</label>
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="4" checked> Qui</label>
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="5" checked> Sex</label>
+      <label style="background:#f5f5f5;border-radius:8px;padding:6px 10px;font-size:.78rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;"><input type="checkbox" value="6" checked> Sáb</label>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <div style="flex:1;">
+        <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Limite de usos (0 = ilimitado)</label>
+        <input type="number" id="cupomLimiteUsos" class="field-inp" placeholder="0" min="0" step="1" value="0">
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Usos por cliente (0 = ilimitado)</label>
+        <input type="number" id="cupomUsosPorCliente" class="field-inp" placeholder="1" min="0" step="1" value="1">
+      </div>
+    </div>
+
+    <label style="font-size:.78rem;font-weight:800;color:#555;display:block;margin-bottom:4px;">Descrição (aparece para o cliente)</label>
+    <input type="text" id="cupomDescricao" class="field-inp" placeholder="Ex: 10% de desconto na primeira compra" style="margin-bottom:16px;">
+
+    <div style="display:flex;gap:8px;">
+      <button onclick="fecharModalCupom()" class="btn-login-cancel" style="flex:1;">Cancelar</button>
+      <button onclick="salvarCupom()" class="btn-login" style="flex:2;">Salvar cupom</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
