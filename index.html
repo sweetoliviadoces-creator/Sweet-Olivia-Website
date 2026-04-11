@@ -401,8 +401,9 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
     </div>
     <div id="clientBarLogged" style="display:none;align-items:center;gap:8px;">
       <span style="font-size:.8rem;font-weight:800;opacity:.95;" id="clientBarName">👋 Olá!</span>
-      <button onclick="openPerfil()" title="Meu perfil" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">👤</button>
-      <button onclick="openTrackingPage()" style="background:var(--pink);color:white;border:none;border-radius:20px;padding:7px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;">🎂 Pedidos</button>
+      <button onclick="openPerfil()" title="Meu perfil" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7DD3E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
       <button onclick="clientLogout()" style="background:rgba(255,255,255,.2);color:white;border:none;border-radius:20px;padding:7px 10px;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Sair</button>
     </div>
   </div>
@@ -433,10 +434,24 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 
 <!-- PERFIL DO CLIENTE -->
 <div class="overlay" id="perfilOverlay">
-  <div class="item-modal" style="border-radius:22px 22px 0 0;max-height:94vh;">
+  <div class="item-modal" style="border-radius:22px 22px 0 0;max-height:98vh;display:flex;flex-direction:column;">
     <div style="background:var(--pink-dark);color:white;padding:18px 20px;border-radius:22px 22px 0 0;display:flex;justify-content:space-between;align-items:center;">
-      <div style="font-family:'Playfair Display',serif;font-size:1.1rem;">👤 Meu Perfil</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7DD3E8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <span style="font-family:'Playfair Display',serif;font-size:1.1rem;">Meu Perfil</span>
+      </div>
       <button onclick="closePerfil()" style="background:rgba(255,255,255,.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;">×</button>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;border-bottom:2px solid #f0ece8;background:white;flex-shrink:0;">
+      <button id="perfilTab-dados" onclick="perfilSubTab('dados')"
+        style="flex:1;background:none;border:none;padding:12px 8px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#7B2D52;border-bottom:2px solid #7B2D52;margin-bottom:-2px;">
+        👤 Perfil
+      </button>
+      <button id="perfilTab-pedidos" onclick="perfilSubTab('pedidos')"
+        style="flex:1;background:none;border:none;padding:12px 8px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;">
+        🎂 Meus Pedidos
+      </button>
     </div>
     <div id="perfilContent" style="padding:18px 20px;overflow-y:auto;flex:1;"></div>
   </div>
@@ -3053,6 +3068,11 @@ function renderTrackingResult(p, pedidoId){
     </div>` : ""}
     ${p.status==="entregue" ? `
     <div class="tr-card" id="avaliacaoCard_${pedidoId}">
+      ${p.avaliado ? `
+      <div style="text-align:center;padding:16px;">
+        <div style="font-size:1.8rem;margin-bottom:6px;">🎉</div>
+        <div style="font-weight:800;color:#7B2D52;">Obrigada pela avaliação!</div>
+      </div>` : `
       <h3>⭐ Avalie sua experiência</h3>
       <p style="font-size:.82rem;color:#888;margin-bottom:12px;">Como foi sua compra na Sweet Olivia?</p>
       <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px;" id="starsRow_${pedidoId}">
@@ -3063,7 +3083,7 @@ function renderTrackingResult(p, pedidoId){
       <button onclick="enviarAvaliacaoLoja('${pedidoId}','${p.nome}')"
         style="width:100%;background:var(--pink-dark);color:white;border:none;border-radius:12px;padding:11px;font-size:.88rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
         Enviar avaliação
-      </button>
+      </button>`}
     </div>` : ""}
     <div style="text-align:center;margin-top:4px;"><button onclick="voltarListaPedidos()" style="background:none;border:none;color:#7B2D52;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.85rem;">← Buscar outro pedido</button></div>`;
 }
@@ -3471,9 +3491,8 @@ function apagarPedido(pedidoId, num){
 
 // ===== VOLTA LISTA PEDIDOS =====
 function voltarListaPedidos(){
-  // Se logada, recarrega os pedidos direto; se não, mostra o formulário
   if(clientUser){
-    openTrackingPage();
+    perfilSubTab('pedidos');
   } else {
     renderTrackingLogin();
   }
@@ -3497,13 +3516,149 @@ function voltarListaPedidos(){
 
 // ===== EXPOSE TO GLOBAL (needed for type="module") =====
 // ===== PERFIL DO CLIENTE =====
-function openPerfil(){
+function openPerfil(tab){
   if(!clientUser) return;
   document.getElementById('perfilOverlay').classList.add('open');
-  renderPerfil();
+  perfilSubTab(tab||'dados');
 }
 function closePerfil(){
   document.getElementById('perfilOverlay').classList.remove('open');
+  if(trUnsubscribe){ trUnsubscribe(); trUnsubscribe=null; }
+}
+function perfilSubTab(tab){
+  const btnDados = document.getElementById('perfilTab-dados');
+  const btnPedidos = document.getElementById('perfilTab-pedidos');
+  if(!btnDados) return;
+  if(tab==='pedidos'){
+    btnPedidos.style.color='#7B2D52'; btnPedidos.style.borderBottom='2px solid #7B2D52';
+    btnDados.style.color='#aaa'; btnDados.style.borderBottom='2px solid transparent';
+    renderPerfilPedidos();
+  } else {
+    btnDados.style.color='#7B2D52'; btnDados.style.borderBottom='2px solid #7B2D52';
+    btnPedidos.style.color='#aaa'; btnPedidos.style.borderBottom='2px solid transparent';
+    renderPerfil();
+  }
+}
+
+async function renderPerfilPedidos(){
+  const el = document.getElementById('perfilContent');
+  el.innerHTML = `<div style="text-align:center;padding:20px;color:#aaa;">Carregando... 🍬</div>`;
+  const snap = await get(ref(db,'pedidos'));
+  const todos = snap.val()||{};
+  const cleanTel = s=>s.replace(/\D/g,'');
+  const meus = Object.entries(todos)
+    .filter(([id,p])=>cleanTel(p.tel)===cleanTel(clientUser.tel))
+    .sort((a,b)=>b[1].createdAt-a[1].createdAt);
+
+  if(!meus.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px;color:#aaa;font-size:.88rem;">🛒 Nenhum pedido ainda.</div>`;
+    return;
+  }
+
+  const statusCfg = {
+    entregue:       {cor:'#2e7d32', bg:'#e8f5e9', icon:'✅', label:'Entregue'},
+    recusado:       {cor:'#c62828', bg:'#ffebee', icon:'❌', label:'Recusado'},
+    aguardando:     {cor:'#f57f17', bg:'#fff8e1', icon:'⏳', label:'Aguardando'},
+    preparando:     {cor:'#1565c0', bg:'#e3f2fd', icon:'🍳', label:'Preparando'},
+    enviado:        {cor:'#6a1b9a', bg:'#f3e5f5', icon:'🛵', label:'Saiu p/ entrega'},
+    pronto_retirada:{cor:'#e65100', bg:'#fff3e0', icon:'🏠', label:'Pronto p/ retirada'},
+  };
+
+  el.innerHTML = `<div id="perfilPedidosList">
+    ${meus.map(([id,p])=>{
+      const cfg = statusCfg[p.status]||{cor:'#888',bg:'#f5f5f5',icon:'📦',label:p.status};
+      const total = (p.total||0)+(p.taxaEntrega||0);
+      const data = new Date(p.createdAt).toLocaleDateString('pt-BR');
+      const hora = new Date(p.createdAt).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      const itens = (p.itens||[]).map(i=>i.qty+'x '+i.name).join(', ');
+      const podeAvaliar = p.status==='entregue' && !p.avaliado;
+
+      return `<div style="border:1.5px solid #f0ece8;border-radius:16px;overflow:hidden;margin-bottom:12px;background:white;">
+        <!-- Header clicável -->
+        <div onclick="abrirPedidoNoPerfil('${id}')" style="padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+              <span style="font-weight:800;font-size:.9rem;color:#222;">#${p.num}</span>
+              <span style="background:${cfg.bg};color:${cfg.cor};border-radius:20px;padding:2px 9px;font-size:.7rem;font-weight:800;">${cfg.icon} ${cfg.label}</span>
+            </div>
+            <div style="font-size:.75rem;color:#888;">${data} às ${hora}</div>
+            <div style="font-size:.78rem;color:#555;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itens}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-weight:800;font-size:.92rem;color:#7B2D52;">${fmt(total)}</div>
+            ${p.desconto>0?`<div style="font-size:.7rem;color:#2e7d32;font-weight:700;">🎟️ -${fmt(p.desconto)}</div>`:''}
+            <div style="font-size:.72rem;color:#bbb;margin-top:4px;">Ver detalhes →</div>
+          </div>
+        </div>
+        <!-- Avaliação inline (só para entregues não avaliados) -->
+        ${podeAvaliar ? `
+        <div id="avalInline_${id}" style="border-top:1px solid #f5f0f3;padding:12px 16px;background:#fdf9fb;">
+          <div style="font-size:.75rem;font-weight:800;color:#7B2D52;margin-bottom:8px;">⭐ Como foi esse pedido?</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            ${[1,2,3,4,5].map(s=>`
+            <span onclick="selNotaPerfilInline('${id}',${s})" id="starInline_${id}_${s}"
+              style="font-size:1.6rem;cursor:pointer;color:#ddd;transition:color .15s;line-height:1;">★</span>`).join('')}
+          </div>
+          <textarea id="obsInline_${id}" placeholder="Deixe um comentário (opcional)..."
+            style="width:100%;border:1.5px solid #f0e8e4;border-radius:10px;padding:8px 10px;font-size:.8rem;font-family:'Nunito',sans-serif;resize:none;outline:none;min-height:56px;box-sizing:border-box;margin-bottom:8px;"></textarea>
+          <button onclick="enviarAvalInline('${id}','${p.nome}')"
+            style="width:100%;background:#7B2D52;color:white;border:none;border-radius:10px;padding:9px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
+            Enviar avaliação
+          </button>
+        </div>` : p.avaliado ? `
+        <div style="border-top:1px solid #f5f0f3;padding:10px 16px;background:#f0faf4;text-align:center;font-size:.75rem;color:#2e7d32;font-weight:700;">
+          ⭐ Você já avaliou este pedido. Obrigada!
+        </div>` : ''}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function selNotaPerfilInline(pedidoId, nota){
+  window[`_notaInline_${pedidoId}`] = nota;
+  for(let s=1;s<=5;s++){
+    const el = document.getElementById(`starInline_${pedidoId}_${s}`);
+    if(el) el.style.color = s<=nota ? '#f4a307' : '#ddd';
+  }
+}
+
+async function enviarAvalInline(pedidoId, nomeCliente){
+  const nota = window[`_notaInline_${pedidoId}`]||0;
+  if(!nota){ alert('Selecione uma nota de 1 a 5 estrelas!'); return; }
+  const jaExiste = await get(ref(db,`avaliacoesLoja/${pedidoId}`));
+  if(jaExiste.val()){
+    document.getElementById(`avalInline_${pedidoId}`).innerHTML =
+      `<div style="text-align:center;padding:8px;font-size:.78rem;color:#2e7d32;font-weight:700;">⭐ Você já avaliou este pedido. Obrigada!</div>`;
+    return;
+  }
+  const comentario = document.getElementById(`obsInline_${pedidoId}`)?.value.trim()||'';
+  const aval = { pedidoId, nome: nomeCliente||'Cliente', nota, comentario, data: Date.now(), aprovada: false, resposta: '' };
+  try {
+    await set(ref(db,`avaliacoesLoja/${pedidoId}`), aval);
+    await set(ref(db,`pedidos/${pedidoId}/avaliado`), true);
+    const card = document.getElementById(`avalInline_${pedidoId}`);
+    if(card) card.innerHTML = `<div style="text-align:center;padding:10px;font-size:.82rem;font-weight:800;color:#7B2D52;">🎉 Obrigada pela avaliação!</div>`;
+  } catch(e){ alert('Erro ao enviar. Tente novamente.'); }
+}
+
+function abrirPedidoNoPerfil(pedidoId){
+  const el = document.getElementById('perfilContent');
+  el.innerHTML = `<div style="text-align:center;padding:20px;color:#aaa;">Carregando...</div>`;
+  get(ref(db,'pedidos')).then(snap=>{
+    const todos = snap.val()||{};
+    const cleanTel = s=>s.replace(/\D/g,'');
+    const meus = Object.entries(todos)
+      .filter(([id,p])=>cleanTel(p.tel)===cleanTel(clientUser.tel))
+      .sort((a,b)=>b[1].createdAt-a[1].createdAt);
+    todosMeusPedidos = meus;
+
+    // Render tracking inline inside perfil using a wrapper div
+    el.innerHTML = `<div id="perfilTrackingWrap">
+      <button onclick="perfilSubTab('pedidos')" style="background:none;border:none;color:#7B2D52;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.82rem;padding:0 0 12px;display:block;">← Voltar</button>
+      <div id="trackingPageContent"></div>
+    </div>`;
+    startTrackingLive(pedidoId, meus);
+  });
 }
 
 async function renderPerfil(){
@@ -3586,7 +3741,7 @@ async function renderPerfil(){
     <div style="background:#f7f3f0;border-radius:14px;padding:14px 16px;">
       <div style="font-size:.72rem;font-weight:800;letter-spacing:1px;color:#7B2D52;margin-bottom:10px;">🎂 MEU HISTÓRICO (${meusPedidos.length} pedido${meusPedidos.length!==1?'s':''})</div>
       ${histHTML}
-      ${meusPedidos.length>5?`<div style="text-align:center;margin-top:8px;"><button onclick="closePerfil();openTrackingPage();" style="background:none;border:none;color:#7B2D52;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.82rem;">Ver todos os pedidos →</button></div>`:''}
+      ${meusPedidos.length>5?`<div style="text-align:center;margin-top:8px;"><button onclick="perfilSubTab('pedidos')" style="background:none;border:none;color:#7B2D52;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;font-size:.82rem;">Ver todos os pedidos →</button></div>`:''}
     </div>
     <div style="height:20px;"></div>`;
 }
@@ -3894,11 +4049,20 @@ function selNotaLoja(pedidoId, nota){
 async function enviarAvaliacaoLoja(pedidoId, nomeCliente){
   const nota = window[`_notaAval_${pedidoId}`]||0;
   if(!nota){ alert('Selecione uma nota de 1 a 5 estrelas!'); return; }
+  // Checa se já avaliou esse pedido
+  const jaExiste = await get(ref(db,`avaliacoesLoja/${pedidoId}`));
+  if(jaExiste.val()){
+    const card = document.getElementById(`avaliacaoCard_${pedidoId}`);
+    if(card) card.innerHTML = `<div style="text-align:center;padding:16px;color:#888;font-size:.85rem;">Você já avaliou este pedido. Obrigada! 🎉</div>`;
+    return;
+  }
   const comentario = document.getElementById(`comentarioAval_${pedidoId}`)?.value.trim()||'';
-  const id = 'av_'+Date.now();
-  const aval = { nome: nomeCliente||'Cliente', nota, comentario, data: Date.now(), aprovada: false, resposta: '' };
+  // Usa pedidoId como chave — garante 1 avaliação por pedido
+  const aval = { pedidoId, nome: nomeCliente||'Cliente', nota, comentario, data: Date.now(), aprovada: false, resposta: '' };
   try {
-    await set(ref(db,`avaliacoesLoja/${id}`), aval);
+    await set(ref(db,`avaliacoesLoja/${pedidoId}`), aval);
+    // Marca no pedido que foi avaliado
+    await set(ref(db,`pedidos/${pedidoId}/avaliado`), true);
     const card = document.getElementById(`avaliacaoCard_${pedidoId}`);
     if(card) card.innerHTML = `
       <div style="text-align:center;padding:16px;">
@@ -4437,7 +4601,9 @@ Object.assign(window,{
   loadPedidos,renderKanban,updatePedidoStatus,criarPedidoFake,salvarTaxa,
   iniciarEscutaPedidos,notificarNovoPedido,
   shareMenu,showClosed,closeClosedPopup,
-  openPerfil,closePerfil,renderPerfil,editarDadosPerfil,salvarDadosPerfil,repetirPedido
+  openPerfil,closePerfil,renderPerfil,editarDadosPerfil,salvarDadosPerfil,repetirPedido,
+  perfilSubTab,renderPerfilPedidos,abrirPedidoNoPerfil,
+  selNotaPerfilInline,enviarAvalInline
 });
 
 // ===== INIT =====
