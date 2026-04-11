@@ -719,6 +719,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       <button class="admin-tab" onclick="aTab('stats',this)">📊 Stats</button>
       <button class="admin-tab" onclick="aTab('clientes',this)">👥 Clientes</button>
       <button class="admin-tab" onclick="aTab('cupons',this)">🎟️ Cupons</button>
+      <button class="admin-tab" onclick="aTab('mensagens',this)">💬 Mensagens</button>
       <button class="admin-tab" onclick="aTab('pedidos',this)">🛒 Pedidos</button>
     </div>
     <div class="admin-body">
@@ -980,6 +981,21 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
         <div id="adminCuponsList" style="margin-top:4px;">
           <div style="text-align:center;padding:24px;color:#aaa;font-size:.85rem;">Clique em "Atualizar lista" para carregar.</div>
         </div>
+      </div>
+
+      <div class="admin-sec" id="atab-mensagens">
+        <div class="admin-card" style="margin-bottom:10px;">
+          <div class="admin-card-title">💬 Mensagens Automáticas</div>
+          <div style="font-size:.78rem;color:#888;margin-bottom:4px;">
+            Use as variáveis abaixo no texto — elas são substituídas automaticamente:<br>
+            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{nome}</code> nome do cliente &nbsp;
+            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{num}</code> número do pedido &nbsp;
+            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{total}</code> valor total &nbsp;
+            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{link}</code> link de acompanhamento
+          </div>
+        </div>
+        <div id="adminMensagensList"></div>
+        <button onclick="salvarMensagens()" style="width:100%;background:#7B2D52;color:white;border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px;">💾 Salvar todas as mensagens</button>
       </div>
 
     </div>
@@ -2416,17 +2432,13 @@ function fmtResumoWA(p){
   txt += `\n*Total: ${fmt((p.total||0)+(p.taxaEntrega||0))}*`;
   return txt;
 }
+// STATUS_WA_MSG agora usa templates editáveis pelo admin
 const STATUS_WA_MSG = {
-  preparando: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* foi *confirmado* e esta sendo preparado com muito carinho!${fmtResumoWA(p)}\n\nAcompanhe em tempo real:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
-  enviado: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* saiu para entrega! Ja esta a caminho!${fmtResumoWA(p)}\n\nAcompanhe:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
-  pronto_retirada: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* esta *pronto para retirada*! Pode vir buscar${fmtResumoWA(p)}\n\nAcompanhe:\n${window.location.href.split('?')[0]}?pedido=${p.id}`,
-  entregue: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}!\n\nSeu pedido *#${p.num}* foi *entregue*! Esperamos que goste muito!${fmtResumoWA(p)}\n\nObrigada pela preferencia! Volte sempre!`,
-  recusado: (p) =>
-    `*Sweet Olivia Doces Gourmet*\n\nOla, ${p.nome}.\n\nInfelizmente nao conseguimos atender seu pedido *#${p.num}* no momento.\n\nEntre em contato pelo WhatsApp para mais informacoes. Pedimos desculpas!`,
+  preparando:      (p) => preencherMsg(getMsgTemplate('preparando'), p),
+  enviado:         (p) => preencherMsg(getMsgTemplate('enviado'), p),
+  pronto_retirada: (p) => preencherMsg(getMsgTemplate('pronto_retirada'), p),
+  entregue:        (p) => preencherMsg(getMsgTemplate('entregue'), p),
+  recusado:        (p) => preencherMsg(getMsgTemplate('recusado'), p),
 };
 
 function updatePedidoStatus(pedidoId, newStatus){
@@ -2530,22 +2542,10 @@ function notificarNovoPedido(p){
     tabBtn.style.position = "relative";
     tabBtn.insertAdjacentHTML("beforeend",`<span id="pedidoBadge" style="position:absolute;top:4px;right:4px;background:#c62828;color:white;border-radius:50%;width:16px;height:16px;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:800;">!</span>`);
   }
-  // Notificar a LOJA via WhatsApp (além do cliente)
-  let msg = `*Novo Pedido #${p.num}* - Sweet Olivia\n\n`;
-  msg += `*Cliente:* ${p.nome} / ${p.tel}\n`;
-  msg += `${p.entrega==="entrega"?"*Entrega:* "+p.endereco:"*Retirada* no local"}\n`;
-  msg += `*Pagamento:* ${p.pagamento}\n\n`;
-  (p.itens||[]).forEach(item=>{
-    msg += `${item.qty}x ${item.name} — ${fmt(item.price*item.qty)}`;
-    if(item.opts&&item.opts.length) msg += `\n  ${item.opts.join(", ")}`;
-    if(item.obs) msg += `\n  Obs: ${item.obs}`;
-    msg += "\n";
-  });
-  msg += `\n*Total:* ${fmt(p.total)}`;
-  msg += `\n*Tempo de preparo:* 60~120min`;
-  msg += `\n*Codigo:* ${p.id}`;
+  // Notificar a LOJA via WhatsApp usando template editável
+  const msgLoja = preencherMsg(getMsgTemplate('novo_pedido'), p);
   const waLoja = WA.replace(/\D/g,"");
-  window.open(`https://wa.me/55${waLoja}?text=${encodeURIComponent(msg)}`, "_blank");
+  window.open(`https://wa.me/55${waLoja}?text=${encodeURIComponent(msgLoja)}`, "_blank");
 }
 
 function iniciarEscutaPedidos(){
@@ -2619,6 +2619,7 @@ function aTab(name,btn){
   }
   if(name==="clientes") renderAdminClientes();
   if(name==="cupons") renderAdminCupons();
+  if(name==="mensagens") renderAdminMensagens();
 }
 function renderAdminProds(){
   const search=(document.getElementById("adminSearch")?.value||"").toLowerCase();
@@ -4573,6 +4574,179 @@ async function deletarCupom(id){
   renderAdminCupons();
 }
 
+
+// ===== MENSAGENS AUTOMÁTICAS =====
+
+// Defaults — usados se não houver nada salvo no Firebase
+const MSGS_DEFAULT = {
+  novo_pedido: {
+    label: '🛒 Novo Pedido (para você)',
+    desc: 'Enviada para o seu WhatsApp quando um pedido chega.',
+    template: `*Novo Pedido #{num}* - Sweet Olivia
+
+*Cliente:* {nome} / {tel}
+{endereco}
+*Pagamento:* {pagamento}
+
+{itens}
+*Total:* {total}
+*Tempo de preparo:* 60~120min
+*Codigo:* {id}`
+  },
+  preparando: {
+    label: '🍳 Confirmado / Preparando',
+    desc: 'Enviada ao cliente quando você confirma o pedido.',
+    template: `*Sweet Olivia Doces Gourmet*
+
+Ola, {nome}!
+
+Seu pedido *#{num}* foi *confirmado* e esta sendo preparado com muito carinho!
+{resumo}
+
+Acompanhe em tempo real:
+{link}`
+  },
+  enviado: {
+    label: '🛵 Saiu para Entrega',
+    desc: 'Enviada ao cliente quando o pedido sai para entrega.',
+    template: `*Sweet Olivia Doces Gourmet*
+
+Ola, {nome}!
+
+Seu pedido *#{num}* saiu para entrega! Ja esta a caminho!
+{resumo}
+
+Acompanhe:
+{link}`
+  },
+  pronto_retirada: {
+    label: '🏠 Pronto para Retirada',
+    desc: 'Enviada ao cliente quando o pedido está pronto para retirar.',
+    template: `*Sweet Olivia Doces Gourmet*
+
+Ola, {nome}!
+
+Seu pedido *#{num}* esta *pronto para retirada*! Pode vir buscar!
+{resumo}
+
+Acompanhe:
+{link}`
+  },
+  entregue: {
+    label: '✅ Entregue',
+    desc: 'Enviada ao cliente quando o pedido é marcado como entregue.',
+    template: `*Sweet Olivia Doces Gourmet*
+
+Ola, {nome}!
+
+Seu pedido *#{num}* foi *entregue*! Esperamos que goste muito!
+{resumo}
+
+Obrigada pela preferencia! Volte sempre!`
+  },
+  recusado: {
+    label: '❌ Recusado',
+    desc: 'Enviada ao cliente quando o pedido é recusado.',
+    template: `*Sweet Olivia Doces Gourmet*
+
+Ola, {nome}.
+
+Infelizmente nao conseguimos atender seu pedido *#{num}* no momento.
+
+Entre em contato pelo WhatsApp para mais informacoes. Pedimos desculpas!`
+  },
+};
+
+let msgsConfig = {};
+
+async function carregarMensagens(){
+  try {
+    const snap = await get(ref(db,'mensagensConfig'));
+    msgsConfig = snap.val()||{};
+  } catch(e){ msgsConfig = {}; }
+}
+
+function getMsgTemplate(key){
+  return (msgsConfig[key]?.template) || MSGS_DEFAULT[key]?.template || '';
+}
+
+function preencherMsg(template, p){
+  const link = window.location.href.split('?')[0]+'?pedido='+p.id;
+  const resumo = fmtResumoWA(p);
+  // Monta itens
+  let itens = '';
+  (p.itens||[]).forEach(item=>{
+    itens += item.qty+'x '+item.name+' — '+fmt(item.price*item.qty);
+    if(item.opts&&item.opts.length) itens += '\n  '+item.opts.join(', ');
+    if(item.obs) itens += '\n  Obs: '+item.obs;
+    itens += '\n';
+  });
+  const endereco = p.entrega==='entrega' ? '*Entrega:* '+(p.endereco||'') : '*Retirada* no local';
+  return template
+    .replace(/{nome}/g, p.nome||'')
+    .replace(/{num}/g, p.num||'')
+    .replace(/{tel}/g, p.tel||'')
+    .replace(/{total}/g, fmt((p.total||0)+(p.taxaEntrega||0)))
+    .replace(/{resumo}/g, resumo)
+    .replace(/{itens}/g, itens.trim())
+    .replace(/{endereco}/g, endereco)
+    .replace(/{pagamento}/g, p.pagamento||'')
+    .replace(/{id}/g, p.id||'')
+    .replace(/{link}/g, link);
+}
+
+async function renderAdminMensagens(){
+  const el = document.getElementById('adminMensagensList');
+  if(!el) return;
+  el.innerHTML = '<div style="text-align:center;padding:12px;color:#aaa;font-size:.82rem;">Carregando...</div>';
+  await carregarMensagens();
+
+  el.innerHTML = Object.entries(MSGS_DEFAULT).map(([key, def])=>{
+    const current = msgsConfig[key]?.template || def.template;
+    return `<div style="border:1.5px solid #f0ece8;border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+      <div style="font-weight:800;font-size:.88rem;color:#333;margin-bottom:3px;">${def.label}</div>
+      <div style="font-size:.72rem;color:#aaa;margin-bottom:8px;">${def.desc}</div>
+      <textarea id="msg_${key}"
+        style="width:100%;border:1.5px solid #eee;border-radius:10px;padding:10px 12px;font-size:.78rem;font-family:'Nunito',sans-serif;resize:vertical;outline:none;min-height:120px;box-sizing:border-box;line-height:1.55;color:#333;"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+      >${current.replace(/</g,'&lt;')}</textarea>
+      <button onclick="resetarMensagem('${key}')"
+        style="background:none;border:none;color:#aaa;font-size:.72rem;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;margin-top:4px;padding:0;">
+        ↺ Restaurar padrão
+      </button>
+    </div>`;
+  }).join('');
+
+  // Auto-resize textareas
+  setTimeout(()=>{
+    document.querySelectorAll('#adminMensagensList textarea').forEach(ta=>{
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight+'px';
+    });
+  }, 50);
+}
+
+async function salvarMensagens(){
+  const data = {};
+  Object.keys(MSGS_DEFAULT).forEach(key=>{
+    const el = document.getElementById('msg_'+key);
+    if(el) data[key] = { template: el.value };
+  });
+  try {
+    await set(ref(db,'mensagensConfig'), data);
+    msgsConfig = data;
+    alert('✅ Mensagens salvas!');
+  } catch(e){ alert('Erro ao salvar. Tente novamente.'); }
+}
+
+function resetarMensagem(key){
+  const el = document.getElementById('msg_'+key);
+  if(!el) return;
+  el.value = MSGS_DEFAULT[key].template;
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight+'px';
+}
+
 Object.assign(window,{
   goTo,openItem,closeItem,chQty,selComp,addCart,concluir,
   openCart,closeCart,cqty,goCheckout,closeCheckout,selEntrega,selPag,enviar,toggleSemNumero,showTrackingModal,copiarPix,atualizarQRCode,atualizarAvisoEntrega,calcularTaxaEntrega,resetarTaxa,
@@ -4597,6 +4771,7 @@ Object.assign(window,{
   renderAdminClientes,
   pedidosSubTab,renderHistorico,
   abrirModalCupom,fecharModalCupom,toggleTipoCupom,salvarCupom,renderAdminCupons,toggleAtivoCupom,deletarCupom,
+  renderAdminMensagens,salvarMensagens,resetarMensagem,carregarMensagens,
   aplicarCupom,atualizarTotaisCheckout,
   loadPedidos,renderKanban,updatePedidoStatus,criarPedidoFake,salvarTaxa,
   iniciarEscutaPedidos,notificarNovoPedido,
@@ -4644,6 +4819,7 @@ window.renderAll = function(){
 })();
 
 fbLoad();
+carregarMensagens();
 loadClientSession();
 </script>
 
