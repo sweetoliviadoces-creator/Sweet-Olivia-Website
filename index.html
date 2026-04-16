@@ -921,7 +921,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       <div class="admin-sec" id="atab-pedidos">
         <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #f0ece8;padding-bottom:0;">
           <button id="ptab-btn-ativos" onclick="pedidosSubTab('ativos')"
-            style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#7B2D52;border-bottom:2px solid #7B2D52;margin-bottom:-2px;">🔴 Ativos</button>
+            style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#7B2D52;border-bottom:2px solid #7B2D52;margin-bottom:-2px;">🟢 Ativos</button>
           <button id="ptab-btn-historico" onclick="pedidosSubTab('historico')"
             style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;">📋 Histórico</button>
           <div style="flex:1;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding-bottom:6px;">
@@ -1072,6 +1072,26 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
     </div>
     <div class="fg"><label>Status</label>
       <select id="eStatus"><option value="available">Disponível</option><option value="unavailable">Indisponível</option></select>
+    </div>
+    <div class="fg">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        <span>Controle de Estoque</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;cursor:pointer;">
+          <input type="checkbox" id="eEstoqueAtivo" style="accent-color:var(--pink);width:15px;height:15px;" onchange="toggleEstoqueField()"> Ativar estoque
+        </label>
+      </label>
+      <div id="eEstoqueField" style="display:none;margin-top:8px;">
+        <input type="number" id="eEstoque" min="0" step="1" placeholder="Quantidade disponível"
+          style="width:100%;border:1.5px solid #ddd;border-radius:9px;padding:9px 12px;font-size:.88rem;font-family:'Nunito',sans-serif;outline:none;">
+        <div style="font-size:.72rem;color:#888;margin-top:4px;">Quando chegar a 0, o produto fica indisponível automaticamente.</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="checkbox" id="eOculto" style="accent-color:var(--pink);width:15px;height:15px;">
+        <span>Ocultar produto no site</span>
+      </label>
+      <div style="font-size:.72rem;color:#888;margin-top:4px;">Produto não aparece para os clientes, mas continua salvo.</div>
     </div>
     <div class="fg">
       <label>Complementos</label>
@@ -1402,6 +1422,7 @@ function renderAll(){
     let h=`<div class="section-title">${cat.label}${!cat.available?'<span class="category-unavailable-badge">Indisponível</span>':''}</div><div class="section-line"></div>`;
     if(cat.info) h+=`<div class="info-box">${cat.info}</div>`;
     cat.products.forEach((p,i)=>{
+      if(p.hidden) return; // produto oculto — não renderiza
       const u=!p.available||!cat.available;
       const isPopular = produtosPopulares[p.name] && produtosPopulares[p.name] >= 3;
       const badgeHtml = isPopular ? `<span style="background:#ff6b35;color:white;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;">🔥 Mais pedido</span>` : '';
@@ -1867,6 +1888,18 @@ function enviar(){
   // Save to Firebase
   if(typeof set==="function" && typeof ref==="function" && typeof db!=="undefined"){
     set(ref(db,"pedidos/"+pedidoId), pedido).catch(e=>console.error("Pedido save error:",e));
+    // Decrement stock for items with stock control enabled
+    pedido.itens.forEach(item=>{
+      categories.forEach(cat=>{
+        const prod = cat.products.find(p=>p.name===item.name);
+        if(prod && prod.estoqueAtivo && prod.estoque!=null){
+          const novoEstoque = Math.max(0, prod.estoque - item.qty);
+          prod.estoque = novoEstoque;
+          if(novoEstoque <= 0) prod.available = false;
+        }
+      });
+    });
+    fbSave();
     // Register coupon usage
     if(cupomAplicado){
       const cupRef = ref(db,'cupons/'+cupomAplicado.codigo);
@@ -1928,7 +1961,7 @@ function enviar(){
   msg+=`\n*Tempo de preparo:* 60~120min`;
   msg+=`\n*Cliente:* ${nome} / ${tel}`;
   msg+=`\n*Codigo:* ${pedidoId}`;
-  msg+=`\n\nAcompanhe: https://sweetoliviadoces.netlify.app/pedidos.html?id=${pedidoId}`;
+  msg+=`\n\nAcompanhe: ${window.location.href.split('?')[0]}?pedido=${pedidoId}`;
   closeCheckout();
   addOrderToStats(totalFinal);
   cart=[];
@@ -1940,6 +1973,19 @@ function enviar(){
 }
 
 function showTrackingModal(pedidoId, num){
+  const isGuest = !clientUser;
+  const fidAtivo = fidelidadeConfig && fidelidadeConfig.ativo;
+  const lembreteHTML = isGuest && fidAtivo ? `
+    <div style="background:linear-gradient(135deg,#7B2D52,#F06292);border-radius:14px;padding:14px 16px;margin-bottom:16px;text-align:left;">
+      <div style="font-size:.7rem;font-weight:800;letter-spacing:1px;color:rgba(255,255,255,.85);margin-bottom:4px;">🎁 PROGRAMA DE FIDELIDADE</div>
+      <div style="font-size:.88rem;font-weight:800;color:white;margin-bottom:5px;">Crie uma conta e acumule pontos!</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.9);line-height:1.4;margin-bottom:10px;">A cada ${fidelidadeConfig.pedidosParaRecompensa||5} pedidos você ganha: <b>${fidelidadeConfig.recompensa||'uma recompensa especial'}</b>. Além disso, acompanhe seus pedidos e histórico no seu perfil.</div>
+      <button onclick="this.closest('div[style*=fixed]').remove();openClientLogin();setTimeout(()=>showClientRegister(),80);"
+        style="background:white;color:#7B2D52;border:none;border-radius:20px;padding:8px 18px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
+        Criar conta grátis →
+      </button>
+    </div>` : '';
+
   const overlay = document.createElement("div");
   overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
   overlay.innerHTML=`
@@ -1951,6 +1997,7 @@ function showTrackingModal(pedidoId, num){
         <div style="font-size:.72rem;color:#aaa;font-weight:800;letter-spacing:1px;margin-bottom:4px;">SEU CÓDIGO</div>
         <div style="font-size:1.1rem;font-weight:800;color:#7B2D52;letter-spacing:2px;">${pedidoId}</div>
       </div>
+      ${lembreteHTML}
       <button onclick="this.closest('div[style*=fixed]').remove();openTrackingPage();"
         style="display:block;width:100%;background:#7B2D52;color:white;border:none;border-radius:30px;padding:13px;font-weight:800;font-family:'Nunito',sans-serif;cursor:pointer;margin-bottom:10px;font-size:.9rem;">
         📦 Acompanhar pedido
@@ -2528,8 +2575,8 @@ function notificarNovoPedido(p){
   if("Notification" in window && Notification.permission==="granted"){
     const n = new Notification("🍬 Novo pedido! #"+p.num, {
       body: `${p.nome} · ${p.entrega==="entrega"?"Entrega":"Retirada"} · ${fmt(p.total)}`,
-      icon: "https://sweetoliviadoces.netlify.app/favicon.ico",
-      badge: "https://sweetoliviadoces.netlify.app/favicon.ico",
+      icon: document.getElementById('faviconLink')?.href || window.location.origin + '/favicon.ico',
+      badge: document.getElementById('faviconLink')?.href || window.location.origin + '/favicon.ico',
       tag: p.id,
       renotify: true
     });
@@ -2640,7 +2687,7 @@ function renderAdminProds(){
       const ri=search?cat.products.indexOf(p):pi;
       h+=`<div class="admin-prod-row">
         <div class="admin-prod-info">
-          <div class="name">${p.name}</div>
+          <div class="name">${p.name}${p.hidden?'<span style="background:#ffebee;color:#c62828;font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:5px;">Oculto</span>':''}${p.estoqueAtivo?`<span style="background:#fff3e0;color:#e65100;font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:5px;">Estoque: ${p.estoque??0}</span>`:''}</div>
           <div class="price">${fmt(p.price)}</div>
         </div>
         <label class="toggle-sw" title="${p.available?'Disponível':'Indisponível'}" style="flex-shrink:0;">
@@ -3204,6 +3251,11 @@ function deleteProd(catId, idx){
   renderAll();renderAdminProds();fbSave();
 }
 
+function toggleEstoqueField(){
+  const ativo = document.getElementById('eEstoqueAtivo').checked;
+  document.getElementById('eEstoqueField').style.display = ativo ? 'block' : 'none';
+}
+
 function openEdit(catId,idx){
   const cat=categories.find(c=>c.id===catId),p=cat.products[idx];
   editTarget={catId,idx,isNew:false};
@@ -3213,6 +3265,13 @@ function openEdit(catId,idx){
   document.getElementById("ePrice").value=p.price;
   document.getElementById("eEmoji").value=p.emoji||"";
   document.getElementById("eStatus").value=p.available?"available":"unavailable";
+  // Estoque
+  const temEstoque = p.estoqueAtivo===true;
+  document.getElementById('eEstoqueAtivo').checked = temEstoque;
+  document.getElementById('eEstoqueField').style.display = temEstoque ? 'block' : 'none';
+  document.getElementById('eEstoque').value = temEstoque ? (p.estoque??0) : '';
+  // Oculto
+  document.getElementById('eOculto').checked = !!p.hidden;
   // Load existing photo
   const existingPhoto = photoData[p.name]||null;
   eCurrentPhoto = existingPhoto;
@@ -3231,6 +3290,10 @@ function openAdd(catId){
   document.getElementById("ePrice").value="";
   document.getElementById("eEmoji").value="🍬";
   document.getElementById("eStatus").value="available";
+  document.getElementById('eEstoqueAtivo').checked=false;
+  document.getElementById('eEstoqueField').style.display='none';
+  document.getElementById('eEstoque').value='';
+  document.getElementById('eOculto').checked=false;
   removePhoto();
   eComps = [];
   renderCompsEditor();
@@ -3242,12 +3305,17 @@ function saveEdit(){
   const cat=categories.find(c=>c.id===editTarget.catId);
   const name=document.getElementById("eName").value.trim();
   if(!name){alert("Nome é obrigatório.");return;}
+  const estoqueAtivo = document.getElementById('eEstoqueAtivo').checked;
+  const estoqueVal = estoqueAtivo ? (parseInt(document.getElementById('eEstoque').value)||0) : null;
   const prod={
     name,
     desc:document.getElementById("eDesc").value.trim(),
     price:parseFloat(document.getElementById("ePrice").value)||0,
     emoji:document.getElementById("eEmoji").value||"🍬",
-    available:document.getElementById("eStatus").value==="available",
+    available: estoqueAtivo ? (estoqueVal > 0) : document.getElementById("eStatus").value==="available",
+    estoqueAtivo: estoqueAtivo,
+    estoque: estoqueAtivo ? estoqueVal : null,
+    hidden: document.getElementById('eOculto').checked,
     complementos: eComps.filter(c=>c.label&&c.options.length>0)
   };
   if(editTarget.isNew){cat.products.push(prod);}
@@ -3285,10 +3353,18 @@ const auth = getAuth(fbApp);
 // Monitora estado de autenticação do admin
 onAuthStateChanged(auth, user => {
   if(user){
-    // Admin logado — garante que o admin está aberto se estava esperando
+    // Admin logado — abre painel automaticamente se estava logado antes (sessão restaurada)
     const adminEl = document.getElementById('adminOverlay');
-    if(adminEl && adminEl.classList.contains('open')){
+    if(!adminEl.classList.contains('open')){
+      // Reabre o admin automaticamente ao recarregar a página
+      openAdmin();
+    } else {
       renderAdminProds(); renderAdminCats(); loadConfigUI(); renderStats();
+    }
+    // Inicia escuta de pedidos se ainda não iniciou (sessão restaurada após reload)
+    if(!adminLogado){
+      adminLogado = true;
+      iniciarEscutaPedidos();
     }
   }
 });
@@ -3313,7 +3389,10 @@ function fbSave(){
         price: p.price,
         available: p.available,
         emoji: p.emoji||"🍬",
-        complementos: p.complementos||[]
+        complementos: p.complementos||[],
+        estoqueAtivo: p.estoqueAtivo||false,
+        estoque: p.estoque!=null ? p.estoque : null,
+        hidden: p.hidden||false
       }))
     }))
   };
@@ -3333,7 +3412,7 @@ function fbLoad(){
         const fbCats = data.categories.map(cat=>({
           ...cat,
           hidden: cat.hidden||false,
-          products: (cat.products||[]).map(p=>({...p,complementos:p.complementos||[]}))
+          products: (cat.products||[]).map(p=>({...p,complementos:p.complementos||[],estoqueAtivo:p.estoqueAtivo||false,estoque:p.estoque!=null?p.estoque:null,hidden:p.hidden||false}))
         }));
         categories = fbCats.map(fbCat => {
           const localCat = categories.find(c => c.id === fbCat.id);
@@ -4761,7 +4840,7 @@ Object.assign(window,{
   setStatus,openCustomClosed,closeCustomClosed,applyCustomClosed,
   openLogin,closeLogin,checkLogin,adminLogout,openAdmin,closeAdmin,aTab,
   renderAdminProds,togCat,openEdit,openAdd,closeEdit,saveEdit,deleteProd,
-  handlePhotoUpload,removePhoto,addComp,toggleMinimize,
+  handlePhotoUpload,removePhoto,addComp,toggleMinimize,toggleEstoqueField,
   renderAdminCats,openAddCat,openEditCat,closeCatModal,saveCat,deleteCat,moveCat,togCatHidden,
   saveHorario,saveConfig,loadConfigUI,renderStats,clearStats,atualizarHorarioUI,
   renderGraficoVendas,renderRankingProdutos,calcularPopulares,
