@@ -1091,7 +1091,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
         <input type="checkbox" id="eOculto" style="accent-color:var(--pink);width:15px;height:15px;">
         <span>Ocultar produto no site</span>
       </label>
-      <div style="font-size:.72rem;color:#888;margin-top:4px;">Produto não aparece para os clientes, mas continua salvo.</div>
+      <div style="font-size:.72rem;color:#888;margin-top:4px;">Produto não aparece para clientes, mas continua salvo.</div>
     </div>
     <div class="fg">
       <label>Complementos</label>
@@ -1422,7 +1422,7 @@ function renderAll(){
     let h=`<div class="section-title">${cat.label}${!cat.available?'<span class="category-unavailable-badge">Indisponível</span>':''}</div><div class="section-line"></div>`;
     if(cat.info) h+=`<div class="info-box">${cat.info}</div>`;
     cat.products.forEach((p,i)=>{
-      if(p.hidden) return; // produto oculto — não renderiza
+      if(p.hidden) return; // produto oculto
       const u=!p.available||!cat.available;
       const isPopular = produtosPopulares[p.name] && produtosPopulares[p.name] >= 3;
       const badgeHtml = isPopular ? `<span style="background:#ff6b35;color:white;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:10px;margin-left:6px;vertical-align:middle;">🔥 Mais pedido</span>` : '';
@@ -1888,14 +1888,13 @@ function enviar(){
   // Save to Firebase
   if(typeof set==="function" && typeof ref==="function" && typeof db!=="undefined"){
     set(ref(db,"pedidos/"+pedidoId), pedido).catch(e=>console.error("Pedido save error:",e));
-    // Decrement stock for items with stock control enabled
+    // Decrementa estoque dos produtos com controle ativo
     pedido.itens.forEach(item=>{
       categories.forEach(cat=>{
         const prod = cat.products.find(p=>p.name===item.name);
         if(prod && prod.estoqueAtivo && prod.estoque!=null){
-          const novoEstoque = Math.max(0, prod.estoque - item.qty);
-          prod.estoque = novoEstoque;
-          if(novoEstoque <= 0) prod.available = false;
+          prod.estoque = Math.max(0, prod.estoque - item.qty);
+          if(prod.estoque <= 0) prod.available = false;
         }
       });
     });
@@ -1979,7 +1978,7 @@ function showTrackingModal(pedidoId, num){
     <div style="background:linear-gradient(135deg,#7B2D52,#F06292);border-radius:14px;padding:14px 16px;margin-bottom:16px;text-align:left;">
       <div style="font-size:.7rem;font-weight:800;letter-spacing:1px;color:rgba(255,255,255,.85);margin-bottom:4px;">🎁 PROGRAMA DE FIDELIDADE</div>
       <div style="font-size:.88rem;font-weight:800;color:white;margin-bottom:5px;">Crie uma conta e acumule pontos!</div>
-      <div style="font-size:.78rem;color:rgba(255,255,255,.9);line-height:1.4;margin-bottom:10px;">A cada ${fidelidadeConfig.pedidosParaRecompensa||5} pedidos você ganha: <b>${fidelidadeConfig.recompensa||'uma recompensa especial'}</b>. Além disso, acompanhe seus pedidos e histórico no seu perfil.</div>
+      <div style="font-size:.78rem;color:rgba(255,255,255,.9);line-height:1.4;margin-bottom:10px;">A cada ${fidelidadeConfig.pedidosParaRecompensa||5} pedidos você ganha: <b>${fidelidadeConfig.recompensa||'uma recompensa especial'}</b>. Acompanhe pedidos e histórico no seu perfil.</div>
       <button onclick="this.closest('div[style*=fixed]').remove();openClientLogin();setTimeout(()=>showClientRegister(),80);"
         style="background:white;color:#7B2D52;border:none;border-radius:20px;padding:8px 18px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">
         Criar conta grátis →
@@ -2575,8 +2574,8 @@ function notificarNovoPedido(p){
   if("Notification" in window && Notification.permission==="granted"){
     const n = new Notification("🍬 Novo pedido! #"+p.num, {
       body: `${p.nome} · ${p.entrega==="entrega"?"Entrega":"Retirada"} · ${fmt(p.total)}`,
-      icon: document.getElementById('faviconLink')?.href || window.location.origin + '/favicon.ico',
-      badge: document.getElementById('faviconLink')?.href || window.location.origin + '/favicon.ico',
+      icon: document.getElementById('faviconLink')?.href || (window.location.origin+'/favicon.ico'),
+      badge: document.getElementById('faviconLink')?.href || (window.location.origin+'/favicon.ico'),
       tag: p.id,
       renotify: true
     });
@@ -3350,21 +3349,26 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
 const auth = getAuth(fbApp);
 
-// Monitora estado de autenticação do admin
+// Flag: fbLoad concluiu a primeira carga
+let fbLoadPronto = false;
+let adminPendente = false; // esperando fbLoad para reabrir admin
+
 onAuthStateChanged(auth, user => {
   if(user){
-    // Admin logado — abre painel automaticamente se estava logado antes (sessão restaurada)
-    const adminEl = document.getElementById('adminOverlay');
-    if(!adminEl.classList.contains('open')){
-      // Reabre o admin automaticamente ao recarregar a página
-      openAdmin();
-    } else {
-      renderAdminProds(); renderAdminCats(); loadConfigUI(); renderStats();
-    }
-    // Inicia escuta de pedidos se ainda não iniciou (sessão restaurada após reload)
+    // Inicia escuta de pedidos imediatamente
     if(!adminLogado){
       adminLogado = true;
       iniciarEscutaPedidos();
+    }
+    // Só reabre o admin após fbLoad terminar (evita mostrar dados antigos)
+    if(fbLoadPronto){
+      if(!document.getElementById('adminOverlay').classList.contains('open')){
+        openAdmin();
+      } else {
+        renderAdminProds(); renderAdminCats(); loadConfigUI(); renderStats();
+      }
+    } else {
+      adminPendente = true; // fbLoad ainda não terminou, reabrirá depois
     }
   }
 });
@@ -3481,9 +3485,24 @@ function fbLoad(){
         if(snapPed.val()) calcularPopulares(snapPed.val());
         if(snapAval.val()){ avaliacoesLoja = snapAval.val(); calcularNotaMedia(); }
         renderAll();
-      }).catch(()=>renderAll());
+        // Marca fbLoad como pronto e reabre admin se estava pendente
+        fbLoadPronto = true;
+        if(adminPendente){
+          adminPendente = false;
+          if(!document.getElementById('adminOverlay').classList.contains('open')){
+            openAdmin();
+          }
+        }
+      }).catch(()=>{
+        renderAll();
+        fbLoadPronto = true;
+        if(adminPendente){ adminPendente=false; openAdmin(); }
+      });
     } else {
       // Atualizações subsequentes: só re-renderiza o cardápio público, nunca mexe no admin
+      if(document.getElementById('adminOverlay').classList.contains('open')){
+        loadConfigUI(); // atualiza horário/config se admin estiver aberto
+      }
       renderAll();
     }
   }, e=>console.error("Firebase load error:",e));
