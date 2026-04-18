@@ -802,12 +802,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
             <div style="flex:1;min-width:160px;">
               <div class="cfg-label">Encaminhar para categoria</div>
               <select id="cfgPascoaDest" class="cfg-input" style="max-width:100%;text-align:left;margin-top:4px;padding:6px 10px;">
-                <option value="copos">Copos da Felicidade</option>
-                <option value="cookies">Cookies</option>
-                <option value="doces">Doces Variados</option>
-                <option value="bolos">Bolos</option>
-                <option value="encomendas">Encomendas</option>
-                <option value="pascoa" selected>Páscoa 2026</option>
+                <option value="">Carregando categorias...</option>
               </select>
             </div>
           </div>
@@ -1927,40 +1922,21 @@ function enviar(){
       });
     }
   }
-  // Build WhatsApp message
+  // Build WhatsApp message usando template editável
   const taxaMsg = (entrega==="entrega" && taxaCalculada) ? taxaCalculada : 0;
-  const totalFinalMsg = totalFinal + taxaMsg; // itens - desconto + entrega
-  let msg=`*Novo Pedido #${orderNum}* - Sweet Olivia\n\n`;
-  cart.forEach(item=>{
-    msg+=`${item.qty}x ${item.name} — ${fmt(item.price*item.qty)}`;
-    if(item.opts&&item.opts.length) msg+=`\n  ${item.opts.join(", ")}`;
-    if(item.obs) msg+=`\n  Obs: ${item.obs}`;
-    msg+="\n";
+  const totalFinalMsg = totalFinal + taxaMsg;
+  const msg = preencherMsg(getMsgTemplate('confirmacao_cliente'), {
+    id: pedidoId,
+    num: orderNum,
+    nome, tel,
+    entrega, endereco,
+    pagamento: pag,
+    total: totalFinal,
+    taxaEntrega: taxaMsg,
+    desconto: desconto||0,
+    cupom: cupomAplicado ? cupomAplicado.codigo : null,
+    itens: cart.map(i=>({name:i.name,qty:i.qty,price:i.price,opts:i.opts||[],obs:i.obs||''}))
   });
-  if(cupomAplicado && desconto>0){
-    msg+=`\n*Subtotal:* ${fmt(cartTotal())}`;
-    msg+=`\n*Cupom ${cupomAplicado.codigo}:* - ${fmt(desconto)}`;
-    msg+=`\n*Total c/ desconto:* ${fmt(totalFinal)}`;
-  } else {
-    msg+=`\n*Subtotal:* ${fmt(totalFinal)}`;
-  }
-  msg+=`\n*Pagamento:* ${pag}`;
-  if(entrega==="entrega"){
-    msg+=`\n*Entrega:* ${endereco}`;
-    if(taxaMsg>0){
-      msg+=`\n*Taxa de entrega:* ${fmt(taxaMsg)}`;
-      msg+=`\n*Total com entrega:* ${fmt(totalFinalMsg)}`;
-    } else {
-      msg+=`\nTaxa a combinar`;
-    }
-  } else {
-    msg+=`\n*Retirada* no local`;
-    msg+=`\n*Total:* ${fmt(totalFinal)}`;
-  }
-  msg+=`\n*Tempo de preparo:* 60~120min`;
-  msg+=`\n*Cliente:* ${nome} / ${tel}`;
-  msg+=`\n*Codigo:* ${pedidoId}`;
-  msg+=`\n\nAcompanhe: ${window.location.href.split('?')[0]}?pedido=${pedidoId}`;
   closeCheckout();
   addOrderToStats(totalFinal);
   cart=[];
@@ -2140,7 +2116,16 @@ function loadConfigUI(){
   document.getElementById('cfgPascoaTitle').value = pascoaConfig.title;
   document.getElementById('cfgPascoaSub').value = pascoaConfig.sub;
   document.getElementById('cfgPascoaBtn').value = pascoaConfig.btn;
-  document.getElementById('cfgPascoaDest').value = pascoaConfig.dest;
+  // Popula select de categorias dinamicamente
+  const destSel = document.getElementById('cfgPascoaDest');
+  if(destSel){
+    destSel.innerHTML = categories.map(cat=>
+      `<option value="${cat.id}"${cat.id===pascoaConfig.dest?' selected':''}>${cat.label}</option>`
+    ).join('');
+    if(!categories.find(c=>c.id===pascoaConfig.dest) && categories.length){
+      destSel.value = categories[0].id;
+    }
+  }
   document.getElementById('cfgPascoaColor').value = pascoaConfig.color;
   document.getElementById('cfgWA').value = WA;
   document.getElementById('cfgPixKey').value = pixKey;
@@ -2693,6 +2678,12 @@ function renderAdminProds(){
           <input type="checkbox" ${p.available?"checked":""} onchange="togProd('${cat.id}',${ri},this.checked)">
           <span class="toggle-slider"></span>
         </label>
+        <button onclick="moveProd('${cat.id}',${ri},-1)" ${ri===0?'disabled':''} title="Mover para cima"
+          style="background:#f0f0f0;border:none;border-radius:8px;padding:5px 7px;cursor:pointer;font-size:.8rem;line-height:1;flex-shrink:0;"
+          ${ri===0?'style="opacity:.35;cursor:default;"':''}>↑</button>
+        <button onclick="moveProd('${cat.id}',${ri},1)" ${ri===cat.products.length-1?'disabled':''} title="Mover para baixo"
+          style="background:#f0f0f0;border:none;border-radius:8px;padding:5px 7px;cursor:pointer;font-size:.8rem;line-height:1;flex-shrink:0;"
+          ${ri===cat.products.length-1?'style="opacity:.35;cursor:default;"':''}>↓</button>
         <button class="btn-editar" onclick="openEdit('${cat.id}',${ri})">Editar</button>
         <button class="btn-excluir" onclick="deleteProd('${cat.id}',${ri})">🗑</button>
       </div>`;
@@ -2703,6 +2694,14 @@ function renderAdminProds(){
   document.getElementById("adminProdList").innerHTML=h;
 }
 function togCat(ci,val){categories[ci].available=val;renderAll();renderAdminProds();fbSave();}
+function moveProd(catId,idx,dir){
+  const cat=categories.find(c=>c.id===catId);
+  if(!cat) return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=cat.products.length) return;
+  [cat.products[idx],cat.products[newIdx]]=[cat.products[newIdx],cat.products[idx]];
+  renderAll();renderAdminProds();fbSave();
+}
 function togCatHidden(ci,val){categories[ci].hidden=val;renderAll();renderAdminProds();renderAdminCats();fbSave();}
 
 // ===== EDIT / ADD =====
@@ -4678,8 +4677,8 @@ async function deletarCupom(id){
 // Defaults — usados se não houver nada salvo no Firebase
 const MSGS_DEFAULT = {
   novo_pedido: {
-    label: '🛒 Novo Pedido (para você)',
-    desc: 'Enviada para o seu WhatsApp quando um pedido chega.',
+    label: '🛒 Novo Pedido (para você, admin)',
+    desc: 'Enviada para o SEU WhatsApp quando um pedido novo chega.',
     template: `*Novo Pedido #{num}* - Sweet Olivia
 
 *Cliente:* {nome} / {tel}
@@ -4690,6 +4689,23 @@ const MSGS_DEFAULT = {
 *Total:* {total}
 *Tempo de preparo:* 60~120min
 *Codigo:* {id}`
+  },
+  confirmacao_cliente: {
+    label: '📋 Confirmação do Pedido (para o cliente)',
+    desc: 'Enviada para o cliente imediatamente após ele finalizar o pedido, com o resumo e tempo de preparo.',
+    template: `*Sweet Olivia Doces Gourmet*
+
+Ola, {nome}! Recebemos seu pedido *#{num}* 🎉
+
+{itens}
+{resumo}
+
+*Pagamento:* {pagamento}
+*Tempo de preparo:* 60~120min
+*Codigo:* {id}
+
+Acompanhe em tempo real:
+{link}`
   },
   preparando: {
     label: '🍳 Confirmado / Preparando',
@@ -4858,7 +4874,7 @@ Object.assign(window,{
   imprimirComanda,
   setStatus,openCustomClosed,closeCustomClosed,applyCustomClosed,
   openLogin,closeLogin,checkLogin,adminLogout,openAdmin,closeAdmin,aTab,
-  renderAdminProds,togCat,openEdit,openAdd,closeEdit,saveEdit,deleteProd,
+  renderAdminProds,togCat,moveProd,openEdit,openAdd,closeEdit,saveEdit,deleteProd,
   handlePhotoUpload,removePhoto,addComp,toggleMinimize,toggleEstoqueField,
   renderAdminCats,openAddCat,openEditCat,closeCatModal,saveCat,deleteCat,moveCat,togCatHidden,
   saveHorario,saveConfig,loadConfigUI,renderStats,clearStats,atualizarHorarioUI,
