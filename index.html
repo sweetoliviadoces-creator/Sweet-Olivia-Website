@@ -217,26 +217,79 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 .btn-login-cancel{background:#eee;color:#555;border:none;width:100%;padding:10px;border-radius:20px;font-weight:800;cursor:pointer;margin-top:7px;font-family:"Nunito",sans-serif;}
 .login-error{color:var(--red);font-size:.78rem;margin-bottom:8px;display:none;font-weight:700;}
 
-.admin-modal{background:#f7f3f0;border-radius:20px 20px 0 0;width:100%;max-width:720px;height:94vh;display:flex;flex-direction:column;animation:slideUp .28s ease;transition:height .3s ease;}
-.admin-modal.minimized{height:62px;overflow:hidden;}
-.admin-hdr{background:var(--pink-dark);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:20px 20px 0 0;flex-shrink:0;}
-.admin-hdr-left{display:flex;align-items:center;gap:12px;}
-.admin-hdr-logo{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
-.admin-hdr h2{font-family:"Playfair Display",serif;font-size:1.05rem;margin:0;}
-.admin-hdr small{font-size:.6rem;letter-spacing:2px;opacity:.7;display:block;font-weight:700;margin-top:1px;}
-.admin-hdr-btns{display:flex;gap:6px;}
-.admin-close,.admin-minimize{background:rgba(255,255,255,.15);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:1rem;cursor:pointer;transition:background .2s;}
-.admin-close:hover,.admin-minimize:hover{background:rgba(255,255,255,.3);}
+/* ===== ADMIN FULL PAGE ===== */
+#adminOverlay{position:fixed;inset:0;z-index:9000;display:none;background:#f2eff0;}
+#adminOverlay.open{display:flex;}
 
-.admin-tabs{display:flex;background:white;border-bottom:2px solid #f0e8e4;flex-shrink:0;padding:0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-.admin-tabs::-webkit-scrollbar{display:none;}
-.admin-tab{flex:0 0 auto;padding:13px 10px;text-align:center;background:none;border:none;cursor:pointer;font-size:.75rem;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;font-family:"Nunito",sans-serif;font-weight:800;transition:all .2s;white-space:nowrap;}
-.admin-tab.active{color:var(--pink-dark);border-bottom:3px solid var(--pink-dark);}
-.admin-tab:hover:not(.active){color:#888;}
+/* Sidebar */
+.adm-sidebar{width:220px;min-width:220px;background:#EC74A4;display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.adm-sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.25);display:flex;align-items:center;gap:10px;}
+.adm-sidebar-logo span{font-family:"Playfair Display",serif;color:white;font-size:1rem;font-weight:700;line-height:1.2;}
+.adm-sidebar-logo small{font-size:.58rem;color:rgba(255,255,255,.75);letter-spacing:2px;font-weight:800;display:block;}
+.adm-nav{flex:1;padding:12px 0;}
+.adm-nav-section{font-size:.6rem;color:#9e4e6e;letter-spacing:2px;font-weight:800;padding:16px 20px 6px;text-transform:uppercase;}
+.adm-nav-item{display:flex;align-items:center;gap:12px;padding:11px 20px;color:#7B2D52;font-size:.84rem;font-weight:800;cursor:pointer;transition:all .18s;border:none;background:none;width:100%;text-align:left;font-family:"Nunito",sans-serif;position:relative;}
+.adm-nav-item:hover{background:rgba(255,255,255,.25);color:#5a1f3a;}
+.adm-nav-item.active{background:rgba(255,255,255,.35);color:#5a1f3a;}
+.adm-nav-item.active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:white;border-radius:0 3px 3px 0;}
+.adm-nav-item .nav-icon{font-size:1.05rem;width:20px;text-align:center;flex-shrink:0;}
+.adm-nav-item .nav-badge{margin-left:auto;background:#7B2D52;color:white;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:20px;}
+.adm-sidebar-footer{padding:16px 20px;border-top:1px solid rgba(255,255,255,.25);}
+.adm-back-btn{display:flex;align-items:center;gap:8px;color:#7B2D52;font-size:.8rem;font-weight:800;cursor:pointer;background:none;border:none;font-family:"Nunito",sans-serif;width:100%;padding:8px 0;transition:color .2s;}
+.adm-back-btn:hover{color:#5a1f3a;}
 
-.admin-body{padding:18px;overflow-y:auto;flex:1;}
+/* Main content area */
+.adm-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.adm-topbar{background:white;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ede8ec;flex-shrink:0;}
+.adm-page-title{font-family:"Playfair Display",serif;font-size:1.15rem;color:#1e0f18;font-weight:700;}
+.adm-topbar-right{display:flex;align-items:center;gap:12px;}
+.adm-user-chip{display:flex;align-items:center;gap:8px;background:#fdf5f8;border-radius:30px;padding:6px 14px 6px 8px;font-size:.78rem;font-weight:700;color:#824459;}
+.adm-user-chip .adm-avatar{width:26px;height:26px;border-radius:50%;background:var(--pink-dark);display:flex;align-items:center;justify-content:center;color:white;font-size:.7rem;}
+.adm-logout-btn{background:none;border:1.5px solid #f0e4ea;border-radius:8px;padding:6px 12px;font-size:.78rem;font-weight:700;color:#824459;cursor:pointer;font-family:"Nunito",sans-serif;transition:all .2s;}
+.adm-logout-btn:hover{background:#fdf5f8;}
+.adm-content{flex:1;overflow-y:auto;padding:28px;}
+
+/* Stat cards no dashboard */
+.adm-stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px;}
+.adm-stat-card{background:white;border-radius:14px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.05);border:1px solid #f0e8ec;}
+.adm-stat-card .stat-label{font-size:.72rem;font-weight:800;color:#aaa;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.adm-stat-card .stat-value{font-size:1.6rem;font-weight:800;color:#1e0f18;font-family:"Playfair Display",serif;}
+.adm-stat-card .stat-sub{font-size:.75rem;color:#aaa;margin-top:3px;}
+.adm-stat-card.pink{border-top:3px solid #EC74A4;}
+.adm-stat-card.wine{border-top:3px solid #824459;}
+.adm-stat-card.green{border-top:3px solid #4caf50;}
+.adm-stat-card.blue{border-top:3px solid #2196f3;}
+
+/* Seções do admin */
 .admin-sec{display:none;}
 .admin-sec.active{display:block;}
+
+/* Admin cards internos */
+.admin-card{background:white;border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);border:1px solid #f0e8ec;}
+.admin-card-title{font-size:.72rem;font-weight:800;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;}
+
+/* Minimized floating bar */
+#adminOverlay.adm-minimized .adm-sidebar,
+#adminOverlay.adm-minimized .adm-main{display:none;}
+#adminOverlay.adm-minimized{display:none !important;}
+.adm-float-bar{display:none;position:fixed;bottom:24px;right:24px;z-index:999999 !important;background:#EC74A4;color:white;border-radius:50px;padding:13px 22px 13px 16px;box-shadow:0 4px 24px rgba(236,116,164,.6);cursor:pointer;align-items:center;gap:10px;font-family:"Nunito",sans-serif;font-weight:800;font-size:.9rem;border:none;transition:transform .15s,box-shadow .15s;}
+.adm-float-bar[data-visible="1"]{display:flex !important;}
+.adm-float-bar:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(236,116,164,.7);}
+.adm-float-bar .adm-float-dot{width:9px;height:9px;border-radius:50%;background:white;opacity:.9;flex-shrink:0;}
+.adm-float-bar .adm-float-badge{background:#7B2D52;color:white;font-size:.62rem;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:2px;}
+/* Mobile sidebar toggle */
+.adm-mob-toggle{display:none;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#1e0f18;padding:0 4px;}
+
+@media(max-width:640px){
+  .adm-sidebar{position:fixed;left:-220px;top:0;bottom:0;z-index:9001;transition:left .25s ease;}
+  .adm-sidebar.mob-open{left:0;}
+  .adm-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9000;}
+  .adm-sidebar-overlay.mob-open{display:block;}
+  .adm-mob-toggle{display:block;}
+  .adm-content{padding:16px;}
+  .adm-topbar{padding:0 16px;}
+  .adm-stats-row{grid-template-columns:1fr 1fr;}
+}
 
 /* Status cards */
 .status-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border:2px solid #eee;border-radius:14px;margin-bottom:10px;cursor:pointer;background:white;transition:all .2s;}
@@ -429,7 +482,7 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
     </div>
     <button class="pascoa-btn" id="pascoaBtnEl" onclick="event.stopPropagation();pascoaGoTo()">Ver cardápio completo</button>
   </div>
-  <div id="sectionsContainer"></div>
+  <div id="sectionsContainer" style="visibility:hidden;"></div>
 </div>
 
 <!-- PERFIL DO CLIENTE -->
@@ -639,6 +692,11 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
         <div id="cupomFeedback" style="display:none;margin-top:7px;border-radius:10px;padding:8px 12px;font-size:.8rem;font-weight:700;"></div>
       </div>
 
+      <div style="margin-top:16px;">
+        <label class="field-lbl">📝 Observações <span style="font-weight:600;color:#bbb;font-size:.75rem;">(opcional)</span></label>
+        <textarea id="coObs" class="field-inp" placeholder="Alguma instrução especial? Ex: sem açúcar, presente, embalagem especial..." rows="3" style="resize:none;line-height:1.5;font-size:.88rem;"></textarea>
+      </div>
+
       <div class="checkout-total-bar" style="flex-direction:column;align-items:stretch;gap:4px;padding:12px 20px;">
         <div style="display:flex;justify-content:space-between;font-size:.85rem;color:#888;">
           <span>Subtotal</span><span id="coSubtotal">R$ 0,00</span>
@@ -698,31 +756,88 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
   </div>
 </div>
 
-<!-- ADMIN -->
-<div class="overlay" id="adminOverlay">
-  <div class="admin-modal">
-    <div class="admin-hdr">
-      <div class="admin-hdr-left">
-        <div class="admin-hdr-logo">🍬</div>
-        <div><h2>Sweet Olivia</h2><small>PAINEL ADMIN</small></div>
+<!-- ADMIN FULL PAGE -->
+<div id="adminOverlay">
+  <!-- Sidebar overlay (mobile) -->
+  <div class="adm-sidebar-overlay" id="admSidebarOverlay" onclick="admToggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <aside class="adm-sidebar" id="admSidebar">
+    <div class="adm-sidebar-logo">
+      <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">🍬</div>
+      <div><span>Sweet Olivia<br><small>PAINEL ADMIN</small></span></div>
+    </div>
+
+    <nav class="adm-nav">
+      <div class="adm-nav-section">Principal</div>
+      <button class="adm-nav-item active" onclick="aTab('status',this)" data-sec="status">
+        <span class="nav-icon">📋</span> Status
+      </button>
+      <button class="adm-nav-item" onclick="aTab('pedidos',this)" data-sec="pedidos">
+        <span class="nav-icon">🛒</span> Pedidos
+        <span class="nav-badge" id="pedidoBadge" style="display:none;">0</span>
+      </button>
+      <button class="adm-nav-item" onclick="aTab('clientes',this)" data-sec="clientes">
+        <span class="nav-icon">👥</span> Clientes
+      </button>
+
+      <div class="adm-nav-section">Loja</div>
+      <button class="adm-nav-item" onclick="aTab('produtos',this)" data-sec="produtos">
+        <span class="nav-icon">🛍️</span> Produtos
+      </button>
+      <button class="adm-nav-item" onclick="aTab('categorias',this)" data-sec="categorias">
+        <span class="nav-icon">📂</span> Categorias
+      </button>
+      <button class="adm-nav-item" onclick="aTab('cupons',this)" data-sec="cupons">
+        <span class="nav-icon">🎟️</span> Cupons
+      </button>
+
+      <button class="adm-nav-item" onclick="aTab('carrinhos',this)" data-sec="carrinhos">
+        <span class="nav-icon">🛒</span> Carrinhos
+        <span class="nav-badge" id="carrinhoBadge" style="display:none;">0</span>
+      </button>
+
+      <div class="adm-nav-section">Análise</div>
+      <button class="adm-nav-item" onclick="aTab('stats',this)" data-sec="stats">
+        <span class="nav-icon">📊</span> Estatísticas
+      </button>
+
+      <div class="adm-nav-section">Configuração</div>
+      <button class="adm-nav-item" onclick="aTab('config',this)" data-sec="config">
+        <span class="nav-icon">⚙️</span> Configurações
+      </button>
+      <button class="adm-nav-item" onclick="aTab('mensagens',this)" data-sec="mensagens">
+        <span class="nav-icon">💬</span> Mensagens
+      </button>
+    </nav>
+
+    <div class="adm-sidebar-footer">
+      <button class="adm-back-btn" onclick="admMinimize()">
+        ← Voltar ao site
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="adm-main">
+    <!-- Top bar -->
+    <div class="adm-topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="adm-mob-toggle" onclick="admToggleSidebar()">☰</button>
+        <span class="adm-page-title" id="admPageTitle">Status</span>
       </div>
-      <div class="admin-hdr-btns">
-        <button class="admin-minimize" onclick="toggleMinimize()" id="adminMinBtn" title="Minimizar">—</button>
-        <button class="admin-close" onclick="closeAdmin()">×</button>
+      <div class="adm-topbar-right">
+        <div class="adm-user-chip">
+          <div class="adm-avatar">A</div>
+          Admin
+        </div>
+        <button class="adm-logout-btn" onclick="admMinimize()" title="Minimizar — voltar ao site sem fechar">— Minimizar</button>
+        <button class="adm-logout-btn" onclick="adminLogout()">Sair</button>
       </div>
     </div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="aTab('status',this)">📋 Status</button>
-      <button class="admin-tab" onclick="aTab('produtos',this)">🛍️ Produtos</button>
-      <button class="admin-tab" onclick="aTab('categorias',this)">📂 Categorias</button>
-      <button class="admin-tab" onclick="aTab('config',this)">⚙️ Config</button>
-      <button class="admin-tab" onclick="aTab('stats',this)">📊 Stats</button>
-      <button class="admin-tab" onclick="aTab('clientes',this)">👥 Clientes</button>
-      <button class="admin-tab" onclick="aTab('cupons',this)">🎟️ Cupons</button>
-      <button class="admin-tab" onclick="aTab('mensagens',this)">💬 Mensagens</button>
-      <button class="admin-tab" onclick="aTab('pedidos',this)">🛒 Pedidos</button>
-    </div>
-    <div class="admin-body">
+
+    <!-- Content -->
+    <div class="adm-content">
       <div class="admin-sec active" id="atab-status">
         <div class="admin-card">
           <div class="admin-card-title">Status do Atendimento</div>
@@ -884,6 +999,29 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       </div>
 
       <div class="admin-sec" id="atab-stats">
+        <!-- Cards de métricas rápidas -->
+        <div class="adm-stats-row" id="admStatCards" style="margin-bottom:24px;">
+          <div class="adm-stat-card pink">
+            <div class="stat-label">Pedidos Hoje</div>
+            <div class="stat-value" id="admStatHoje">—</div>
+            <div class="stat-sub">pedidos recebidos</div>
+          </div>
+          <div class="adm-stat-card wine">
+            <div class="stat-label">Faturamento Hoje</div>
+            <div class="stat-value" id="admStatFat">—</div>
+            <div class="stat-sub">em pedidos</div>
+          </div>
+          <div class="adm-stat-card green">
+            <div class="stat-label">Total Clientes</div>
+            <div class="stat-value" id="admStatClientes">—</div>
+            <div class="stat-sub">cadastrados</div>
+          </div>
+          <div class="adm-stat-card blue">
+            <div class="stat-label">Aguardando</div>
+            <div class="stat-value" id="admStatAguard">—</div>
+            <div class="stat-sub">para confirmar</div>
+          </div>
+        </div>
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-num" id="statTotal">0</div>
@@ -914,20 +1052,41 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       </div>
 
       <div class="admin-sec" id="atab-pedidos">
-        <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #f0ece8;padding-bottom:0;">
-          <button id="ptab-btn-ativos" onclick="pedidosSubTab('ativos')"
-            style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#7B2D52;border-bottom:2px solid #7B2D52;margin-bottom:-2px;">🟢 Ativos</button>
-          <button id="ptab-btn-historico" onclick="pedidosSubTab('historico')"
-            style="background:none;border:none;padding:8px 14px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;">📋 Histórico</button>
-          <div style="flex:1;display:flex;justify-content:flex-end;align-items:center;gap:6px;padding-bottom:6px;">
-            <button onclick="criarPedidoFake()" style="background:#fff3e0;border:1.5px solid #ffcc80;border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:800;color:#e65100;cursor:pointer;font-family:'Nunito',sans-serif;">🧪 Teste</button>
-            <button onclick="loadPedidos();renderHistorico();" style="background:none;border:1.5px solid #eee;border-radius:20px;padding:5px 12px;font-size:.72rem;font-weight:800;color:#888;cursor:pointer;font-family:'Nunito',sans-serif;">↻</button>
+        <!-- iFood-style: left list + right detail panel -->
+        <div style="display:flex;height:calc(100vh - 110px);gap:0;border-radius:14px;overflow:hidden;border:1px solid #f0e8ec;">
+
+          <!-- Left: order list -->
+          <div style="width:280px;min-width:280px;background:white;border-right:1px solid #f0e8ec;display:flex;flex-direction:column;">
+            <!-- Filters bar -->
+            <div style="padding:12px;border-bottom:1px solid #f0e8ec;">
+              <input type="text" id="ifoodBusca" placeholder="🔍 Buscar pedido..." oninput="renderIfoodList()"
+                style="width:100%;border:1.5px solid #eee;border-radius:20px;padding:7px 12px;font-size:.78rem;font-family:'Nunito',sans-serif;outline:none;box-sizing:border-box;">
+              <div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;">
+                <button onclick="setIfoodFiltro('ativos',this)" id="ifiltro-ativos"
+                  style="background:#7B2D52;color:white;border:none;border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">Ativos</button>
+                <button onclick="setIfoodFiltro('todos',this)" id="ifiltro-todos"
+                  style="background:#f5f0f3;color:#888;border:none;border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">Todos</button>
+                <button onclick="setIfoodFiltro('entregue',this)" id="ifiltro-entregue"
+                  style="background:#f5f0f3;color:#888;border:none;border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">Concluídos</button>
+                <button onclick="criarPedidoFake()" style="margin-left:auto;background:#fff3e0;border:1px solid #ffcc80;border-radius:20px;padding:4px 10px;font-size:.7rem;font-weight:800;color:#e65100;cursor:pointer;font-family:'Nunito',sans-serif;">🧪</button>
+              </div>
+            </div>
+            <!-- Order list -->
+            <div id="ifoodList" style="flex:1;overflow-y:auto;"></div>
           </div>
+
+          <!-- Right: order detail -->
+          <div id="ifoodDetail" style="flex:1;background:#f9f5f7;overflow-y:auto;display:flex;align-items:center;justify-content:center;">
+            <div style="text-align:center;color:#ccc;">
+              <div style="font-size:2.5rem;margin-bottom:8px;">🛒</div>
+              <div style="font-size:.88rem;font-weight:700;">Selecione um pedido</div>
+            </div>
+          </div>
+
         </div>
-        <div id="ptab-ativos">
-          <div id="kanbanBoard" style="display:flex;flex-direction:column;gap:10px;"></div>
-        </div>
-        <div id="ptab-historico" style="display:none;">
+
+        <!-- Histórico kept below -->
+        <div id="ptab-historico" style="display:none;margin-top:16px;">
           <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
             <input type="text" id="histBusca" placeholder="Buscar nome, #número ou telefone..." oninput="renderHistorico()"
               style="flex:1;min-width:180px;border:1.5px solid #eee;border-radius:20px;padding:8px 14px;font-size:.82rem;font-family:'Nunito',sans-serif;outline:none;">
@@ -986,16 +1145,28 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
             <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{nome}</code> nome do cliente &nbsp;
             <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{num}</code> número do pedido &nbsp;
             <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{total}</code> valor total &nbsp;
-            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{link}</code> link de acompanhamento
+            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{link}</code> link de acompanhamento &nbsp;
+            <code style="background:#f5f5f5;border-radius:4px;padding:1px 5px;font-size:.75rem;">{obs}</code> observação do cliente
           </div>
         </div>
         <div id="adminMensagensList"></div>
         <button onclick="salvarMensagens()" style="width:100%;background:#7B2D52;color:white;border:none;border-radius:12px;padding:12px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px;">💾 Salvar todas as mensagens</button>
       </div>
 
-    </div>
-  </div>
-</div>
+      <!-- CARRINHOS ABANDONADOS -->
+      <div class="admin-sec" id="atab-carrinhos">
+        <div class="admin-card" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="admin-card-title">🛒 Carrinhos Abandonados</div>
+            <div style="font-size:.78rem;color:#888;">Clientes que montaram carrinho mas não finalizaram o pedido.</div>
+          </div>
+          <button onclick="limparCarrinhosAntigos()" style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:700;color:#c62828;cursor:pointer;font-family:'Nunito',sans-serif;">🗑 Limpar com +7 dias</button>
+        </div>
+        <div id="carrinhoAbandonadoList"><div style="text-align:center;padding:40px;color:#bbb;font-size:.9rem;">Carregando...</div></div>
+      </div>
+  </div><!-- end adm-main -->
+
+</div><!-- end adminOverlay -->
 
 <!-- CLIENT LOGIN MODAL -->
 <div class="login-overlay" id="clientLoginOverlay">
@@ -1109,6 +1280,7 @@ const WA_DEFAULT="5588988392203";
 let MIN=20, WA=WA_DEFAULT;
 let pixKey="sweetoliviadoces@gmail.com";
 let openHour=12, closeHour=21;
+let openTimeStr='12:00', closeTimeStr='21:00';
 let fidelidadeConfig = {
   ativo: true,
   pedidosParaRecompensa: 5,
@@ -1402,6 +1574,7 @@ function showCupomFeedback(msg, sucesso){
 // ===== RENDER =====
 function renderAll(){
   const c=document.getElementById("sectionsContainer");c.innerHTML="";
+  c.style.visibility='visible'; // remove o flash de conteúdo antigo
   // Re-renderiza a nav dinamicamente
   const navInner=document.getElementById("navInner");
   if(navInner){
@@ -1464,7 +1637,7 @@ function showClosed(){
 function closeClosedPopup(){document.getElementById("closedOverlay").classList.add("hidden");}
 function isOpen(){ 
   if(status==="closed") return false;
-  if(status==="schedule"){const h=new Date().getHours();return h>=openHour&&h<closeHour;}
+  if(status==="schedule"){const now=new Date();const t=now.getHours()+now.getMinutes()/60;return t>=openHour&&t<closeHour;}
   return true;
 }
 
@@ -1499,11 +1672,19 @@ function openItem(catId,idx){
     curItem.p.complementos.forEach((comp,ci)=>{
       let h=`<div class="comp-sec"><div class="comp-lbl-row"><span class="comp-lbl">${comp.label}</span>${comp.required?'<span class="obrig-badge">OBRIGATÓRIO</span>':''}</div><div class="comp-hint">${comp.hint}</div>`;
       comp.options.forEach((opt,oi)=>{
-        h+=`<div class="comp-opt" id="co-${ci}-${oi}" onclick="selComp(${ci},${oi})">
-          <div class="comp-radio"><div class="comp-radio-inner"></div></div>
-          <span class="comp-opt-name">${opt.name}</span>
-          <span class="comp-opt-price${opt.price>0?' paid':''}">${opt.price>0?"+"+fmt(opt.price):"R$ 0,00"}</span>
-        </div>`;
+        if(opt.unavailable){
+          h+=`<div class="comp-opt" style="opacity:.45;pointer-events:none;cursor:default;" id="co-${ci}-${oi}">
+            <div class="comp-radio"></div>
+            <span class="comp-opt-name" style="text-decoration:line-through;">${opt.name}</span>
+            <span style="font-size:.72rem;color:#aaa;font-weight:700;">Indisponível</span>
+          </div>`;
+        } else {
+          h+=`<div class="comp-opt" id="co-${ci}-${oi}" onclick="selComp(${ci},${oi})">
+            <div class="comp-radio"><div class="comp-radio-inner"></div></div>
+            <span class="comp-opt-name">${opt.name}</span>
+            <span class="comp-opt-price${opt.price>0?' paid':''}">${opt.price>0?"+"+fmt(opt.price):"R$ 0,00"}</span>
+          </div>`;
+        }
       });
       h+=`</div>`;cd.innerHTML+=h;
     });
@@ -1540,8 +1721,8 @@ function buildItem(){
   Object.values(compSel).forEach(s=>{price+=s.price||0;opts.push(s.name);});
   return {...curItem.p,price,qty:curQty,obs:document.getElementById("iObs").value.trim(),opts,catId:curItem.catId};
 }
-function addCart(){if(!valComps())return;cart.push(buildItem());closeItem();openCart();}
-function concluir(){if(!valComps())return;cart.push(buildItem());closeItem();goCheckout();}
+function addCart(){if(!valComps())return;cart.push(buildItem());closeItem();openCart();agendarSalvamentoCarrinho();}
+function concluir(){if(!valComps())return;cart.push(buildItem());closeItem();goCheckout();agendarSalvamentoCarrinho();}
 function closeItem(){document.getElementById("itemOverlay").classList.remove("open");curItem=null;}
 
 // ===== CART =====
@@ -1575,7 +1756,7 @@ function renderCart(){
   document.getElementById("cartTotal").textContent=fmt(cartTotal());
   foot.style.display="block";
 }
-function cqty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);renderCart();}
+function cqty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);renderCart();agendarSalvamentoCarrinho();}
 
 // ===== CHECKOUT =====
 function goCheckout(){
@@ -1861,7 +2042,8 @@ function enviar(){
   // Build order object for Firebase
   const subtotalItens = cartTotal();
   const desconto = calcularDesconto(subtotalItens);
-  const totalFinal = subtotalItens - desconto; // sem taxa; taxa é adicionada pelo admin depois
+  const totalFinal = subtotalItens - desconto;
+  const obs = (document.getElementById('coObs')?.value||'').trim();
   const pedido = {
     id: pedidoId,
     num: orderNum,
@@ -1873,6 +2055,7 @@ function enviar(){
     desconto: desconto||0,
     cupom: cupomAplicado ? cupomAplicado.codigo : null,
     taxaEntrega: (entrega==="entrega" && taxaCalculada) ? taxaCalculada : 0,
+    obs: obs||null,
     status: "aguardando",
     createdAt: Date.now(),
     itens: cart.map(i=>({
@@ -1935,11 +2118,13 @@ function enviar(){
     taxaEntrega: taxaMsg,
     desconto: desconto||0,
     cupom: cupomAplicado ? cupomAplicado.codigo : null,
+    obs: obs||'',
     itens: cart.map(i=>({name:i.name,qty:i.qty,price:i.price,opts:i.opts||[],obs:i.obs||''}))
   });
   closeCheckout();
   addOrderToStats(totalFinal);
   cart=[];
+  limparCarrinhoAtual(); // remove carrinho abandonado pois pedido foi finalizado
   taxaCalculada = null;
   cupomAplicado = null;
   // Show tracking modal
@@ -2038,19 +2223,26 @@ function adminLogout(){
 }
 // ===== CONFIG =====
 function saveHorario(){
-  openHour = parseInt(document.getElementById('cfgOpenTime').value.split(':')[0])||12;
-  closeHour = parseInt(document.getElementById('cfgCloseTime').value.split(':')[0])||21;
-  // Update status tab display
-  document.querySelector('#st-sched + label').textContent = `⏰ Por horário (${openHour}h–${closeHour}h automático)`;
-  // Atualiza o pill de horário no header
+  const ov = document.getElementById('cfgOpenTime').value||'12:00';
+  const cv = document.getElementById('cfgCloseTime').value||'21:00';
+  const [oh, om] = ov.split(':').map(Number);
+  const [ch, cm] = cv.split(':').map(Number);
+  openHour = oh + (om||0)/60;
+  closeHour = ch + (cm||0)/60;
+  // guarda também os valores de string para exibição
+  openTimeStr = ov;
+  closeTimeStr = cv;
+  document.querySelector('#st-sched + label').textContent = `⏰ Por horário (${ov}–${cv} automático)`;
   const hp = document.getElementById('horarioPill');
-  if(hp) hp.textContent = `⏰ ${openHour}h às ${closeHour}h`;
+  if(hp) hp.textContent = `⏰ ${ov} às ${cv}`;
   fbSave();
 }
 
 function atualizarHorarioUI(){
   const hp = document.getElementById('horarioPill');
-  if(hp) hp.textContent = `⏰ ${openHour}h às ${closeHour}h`;
+  const ov = openTimeStr || (String(Math.floor(openHour)).padStart(2,'0')+':'+String(Math.round((openHour%1)*60)).padStart(2,'0'));
+  const cv = closeTimeStr || (String(Math.floor(closeHour)).padStart(2,'0')+':'+String(Math.round((closeHour%1)*60)).padStart(2,'0'));
+  if(hp) hp.textContent = `⏰ ${ov} às ${cv}`;
 }
 
 function saveConfig(){
@@ -2104,10 +2296,10 @@ function saveConfig(){
 }
 
 function loadConfigUI(){
-  const oh = String(openHour).padStart(2,'0');
-  const ch = String(closeHour).padStart(2,'0');
-  document.getElementById('cfgOpenTime').value = `${oh}:00`;
-  document.getElementById('cfgCloseTime').value = `${ch}:00`;
+  const ov = openTimeStr || (String(Math.floor(openHour)).padStart(2,'0')+':'+String(Math.round((openHour%1)*60)).padStart(2,'0'));
+  const cv = closeTimeStr || (String(Math.floor(closeHour)).padStart(2,'0')+':'+String(Math.round((closeHour%1)*60)).padStart(2,'0'));
+  document.getElementById('cfgOpenTime').value = ov;
+  document.getElementById('cfgCloseTime').value = cv;
   document.getElementById('cfgMinOrder').value = MIN;
   document.getElementById('cfgBannerText').value = bannerText.replace(/<[^>]+>/g,'');
   document.getElementById('cfgBannerColor').value = bannerColor;
@@ -2344,92 +2536,178 @@ function loadPedidos(){
   });
 }
 
-function renderKanban(){
-  const board = document.getElementById("kanbanBoard");
-  if(!board) return;
-  const ativos = Object.values(pedidosData)
-    .filter(p=>p.status!=="entregue"&&p.status!=="recusado")
-    .sort((a,b)=>b.createdAt-a.createdAt);
-  const concluidos = Object.values(pedidosData)
-    .filter(p=>p.status==="entregue"||p.status==="recusado")
-    .sort((a,b)=>b.createdAt-a.createdAt)
-    .slice(0,3); // Recentes apenas; ver tudo em Histórico
+// ===== iFood-style order manager =====
+let ifoodFiltro = 'ativos';
+let ifoodSelectedId = null;
 
-  if(!ativos.length && !concluidos.length){
-    board.innerHTML=`<div style="text-align:center;padding:30px;color:#aaa;font-size:.88rem;">Nenhum pedido ainda 🛒</div>`;
+function setIfoodFiltro(filtro, btn){
+  ifoodFiltro = filtro;
+  document.querySelectorAll('[id^="ifiltro-"]').forEach(b=>{
+    b.style.background='#f5f0f3'; b.style.color='#888';
+  });
+  if(btn){ btn.style.background='#7B2D52'; btn.style.color='white'; }
+  renderIfoodList();
+}
+
+function renderIfoodList(){
+  const el = document.getElementById('ifoodList');
+  if(!el) return;
+  const busca = (document.getElementById('ifoodBusca')?.value||'').toLowerCase();
+  let lista = Object.values(pedidosData).sort((a,b)=>b.createdAt-a.createdAt);
+  if(ifoodFiltro==='ativos') lista = lista.filter(p=>p.status!=='entregue'&&p.status!=='recusado');
+  if(ifoodFiltro==='entregue') lista = lista.filter(p=>p.status==='entregue'||p.status==='recusado');
+  if(busca) lista = lista.filter(p=>
+    (p.nome||'').toLowerCase().includes(busca)||
+    String(p.num||'').includes(busca)||
+    (p.tel||'').includes(busca)
+  );
+  if(!lista.length){
+    el.innerHTML='<div style="text-align:center;padding:30px;color:#bbb;font-size:.82rem;">Nenhum pedido 🛒</div>';
     return;
   }
+  el.innerHTML = lista.map(p=>{
+    const cfg = STATUS_CONFIG[p.status]||STATUS_CONFIG.aguardando;
+    const ago = Math.floor((Date.now()-p.createdAt)/60000);
+    const agoStr = ago<1?'agora':ago<60?ago+'min':Math.floor(ago/60)+'h';
+    const isSelected = p.id===ifoodSelectedId;
+    const itensCount = (p.itens||[]).reduce((s,i)=>s+i.qty,0);
+    return `<div style="position:relative;padding:12px 14px;border-bottom:1px solid #f0e8ec;cursor:pointer;transition:background .15s;
+             background:${isSelected?'#fdf0f6':'white'};" onclick="selectIfoodPedido('${p.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3px;">
+        <span style="font-weight:800;font-size:.85rem;color:#1e0f18;">#${p.num} ${p.nome}</span>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:.68rem;color:#bbb;white-space:nowrap;">${agoStr}</span>
+          <button onclick="event.stopPropagation();apagarPedido('${p.id}','${p.num}')"
+            style="background:none;border:none;cursor:pointer;font-size:.85rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .15s;"
+            onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'" title="Apagar pedido">🗑️</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.72rem;color:#888;">${itensCount} iten${itensCount!==1?'s':''} • ${p.entrega==='entrega'?'🛵':'🏠'} ${p.pagamento}</span>
+        <span style="background:${cfg.color}22;color:${cfg.color};border-radius:20px;padding:2px 8px;font-size:.65rem;font-weight:800;">${cfg.label}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  let h = "";
-  if(ativos.length){
-    h += `<div class="kanban-col">
-      <div class="kanban-col-title" style="color:#7B2D52;">Pedidos Ativos <span class="kanban-badge">${ativos.length}</span></div>
-      ${ativos.map(p=>pedidoCardHTML(p)).join("")}
+function selectIfoodPedido(id){
+  ifoodSelectedId = id;
+  renderIfoodList(); // re-highlight
+  renderIfoodDetail(pedidosData[id]);
+}
+
+function renderIfoodDetail(p){
+  const el = document.getElementById('ifoodDetail');
+  if(!el||!p) return;
+  const cfg = STATUS_CONFIG[p.status]||STATUS_CONFIG.aguardando;
+  const taxaEntrega = p.taxaEntrega||0;
+  const totalFinal = p.total + taxaEntrega;
+  const ago = Math.floor((Date.now()-p.createdAt)/60000);
+  const agoStr = ago<1?'agora':ago<60?ago+' min atrás':Math.floor(ago/60)+'h atrás';
+  const dt = new Date(p.createdAt);
+  const hora = dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const dia = dt.toLocaleDateString('pt-BR');
+
+  // Progress bar steps
+  const steps = ['aguardando','confirmado','preparando','enviado','pronto_retirada','entregue'];
+  const stepLabels = {aguardando:'Aguardando',confirmado:'Confirmado',preparando:'Preparando',enviado:'Enviado',pronto_retirada:'Pronto',entregue:'Entregue',recusado:'Recusado'};
+  const si = steps.indexOf(p.status);
+
+  const btns = cfg.next.map(n=>
+    `<button class="btn-status ${n.cls}" onclick="updatePedidoStatus('${p.id}','${n.key}');selectIfoodPedido('${p.id}')"
+      style="flex:1;padding:10px;border-radius:10px;font-size:.82rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;border:none;">${n.label}</button>`
+  ).join('');
+
+  el.innerHTML = `
+    <div style="padding:20px;max-width:600px;margin:0 auto;width:100%;">
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:#1e0f18;">#${p.num} — ${p.nome}</div>
+          <div style="font-size:.78rem;color:#aaa;margin-top:2px;">${dia} às ${hora} (${agoStr})</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="imprimirComanda('${p.id}')" title="Imprimir"
+            style="background:white;border:1.5px solid #eee;border-radius:8px;padding:6px 10px;font-size:.8rem;cursor:pointer;">🖨️</button>
+          <button onclick="apagarPedido('${p.id}','${p.num}')"
+            style="background:#fff0f0;border:1.5px solid #ffcdd2;border-radius:8px;padding:6px 10px;font-size:.8rem;cursor:pointer;color:#c62828;">🗑️</button>
+        </div>
+      </div>
+
+      <!-- Status badge -->
+      <div style="background:${cfg.color}15;border:1.5px solid ${cfg.color}44;border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="color:${cfg.color};font-weight:800;font-size:.88rem;">${cfg.label}</span>
+        ${si>=0?`<div style="flex:1;height:4px;background:#eee;border-radius:4px;overflow:hidden;">
+          <div style="width:${Math.round((si/(steps.length-1))*100)}%;height:100%;background:${cfg.color};border-radius:4px;transition:width .3s;"></div>
+        </div>`:''}
+      </div>
+
+      <!-- Client info -->
+      <div style="background:white;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid #f0e8ec;">
+        <div style="font-size:.68rem;font-weight:800;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Cliente</div>
+        <div style="font-weight:800;font-size:.9rem;color:#1e0f18;margin-bottom:4px;">${p.nome}</div>
+        <div style="font-size:.8rem;color:#888;margin-bottom:2px;">📱 ${p.tel}</div>
+        <div style="font-size:.8rem;color:#888;margin-bottom:2px;">${p.entrega==='entrega'?`🛵 Entrega${p.endereco?': '+p.endereco:''}`:'🏠 Retirada no local'}</div>
+        <div style="font-size:.8rem;color:#888;">💳 ${p.pagamento}</div>
+        ${p.obs?`<div style="margin-top:8px;background:#fffbe6;border-left:3px solid #f5c842;padding:6px 10px;border-radius:0 8px 8px 0;font-size:.78rem;">📝 <b>Obs:</b> ${p.obs}</div>`:''}
+      </div>
+
+      <!-- Items -->
+      <div style="background:white;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid #f0e8ec;">
+        <div style="font-size:.68rem;font-weight:800;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;">Itens do pedido</div>
+        ${(p.itens||[]).map(i=>`
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f5f0f3;">
+            <div>
+              <div style="font-weight:800;font-size:.85rem;">${i.qty}x ${i.name}</div>
+              ${i.opts&&i.opts.length?`<div style="font-size:.72rem;color:#888;">${i.opts.join(', ')}</div>`:''}
+              ${i.obs?`<div style="font-size:.72rem;color:#c57800;">Obs: ${i.obs}</div>`:''}
+            </div>
+            <div style="font-weight:800;font-size:.85rem;color:#7B2D52;white-space:nowrap;">${fmt(i.price*i.qty)}</div>
+          </div>`).join('')}
+        <div style="margin-top:10px;">
+          ${p.desconto?`<div style="display:flex;justify-content:space-between;font-size:.8rem;color:#2e7d32;margin-bottom:4px;"><span>🎟️ Desconto${p.cupom?' ('+p.cupom+')':''}</span><span>- ${fmt(p.desconto)}</span></div>`:''}
+          ${p.entrega==='entrega'?`
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:#888;margin-bottom:4px;">
+            <span>🛵 Taxa de entrega</span>
+            <div style="display:flex;gap:4px;align-items:center;">
+              <input type="number" min="0" step="0.5" value="${taxaEntrega||''}" placeholder="0,00"
+                style="width:70px;border:1.5px solid #e8a0c0;border-radius:8px;padding:3px 6px;font-size:.82rem;font-family:'Nunito',sans-serif;outline:none;text-align:right;font-weight:800;"
+                id="taxa_${p.id}" onchange="salvarTaxa('${p.id}',this.value)">
+              <button onclick="salvarTaxa('${p.id}',document.getElementById('taxa_${p.id}').value)"
+                style="background:#7B2D52;color:white;border:none;border-radius:8px;padding:4px 8px;font-size:.75rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">✓</button>
+            </div>
+          </div>`:''}
+          <div style="display:flex;justify-content:space-between;font-weight:800;font-size:.95rem;color:#1e0f18;border-top:1px solid #f0e8ec;padding-top:8px;margin-top:4px;" id="total_${p.id}">
+            <span>Total</span><span style="color:#7B2D52;">${fmt(totalFinal)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp + action buttons -->
+      <div style="background:white;border-radius:12px;padding:14px;border:1px solid #f0e8ec;">
+        <div style="font-size:.68rem;font-weight:800;color:#aaa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;">Ações</div>
+        <a href="https://wa.me/55${p.tel.replace(/\D/g,'')}" target="_blank"
+          style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:white;border-radius:10px;padding:10px;font-weight:800;font-size:.85rem;text-decoration:none;font-family:'Nunito',sans-serif;margin-bottom:10px;">
+          💬 Falar com ${p.nome}
+        </a>
+        ${btns?`<div style="display:flex;gap:8px;flex-wrap:wrap;">${btns}</div>`:'<div style="text-align:center;color:#aaa;font-size:.78rem;">Pedido finalizado</div>'}
+      </div>
+
     </div>`;
+}
+
+function renderKanban(){
+  renderIfoodList();
+  // Se tinha um pedido selecionado, re-renderiza o detalhe
+  if(ifoodSelectedId && pedidosData[ifoodSelectedId]){
+    renderIfoodDetail(pedidosData[ifoodSelectedId]);
   }
-  if(concluidos.length){
-    h += `<div class="kanban-col">
-      <div class="kanban-col-title" style="color:#888;">Últimos Concluídos <span class="kanban-badge">${concluidos.length}</span> <button onclick="pedidosSubTab('historico')" style="background:none;border:none;color:#7B2D52;font-size:.7rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">Ver todos →</button></div>
-      ${concluidos.map(p=>pedidoCardHTML(p,true)).join("")}
-    </div>`;
-  }
-  board.innerHTML = h;
 }
 
 function pedidoCardHTML(p, concluido=false){
-  const cfg = STATUS_CONFIG[p.status]||STATUS_CONFIG.aguardando;
-  const ago = Math.floor((Date.now()-p.createdAt)/60000);
-  const agoStr = ago<1?"agora":ago<60?`${ago}min`:`${Math.floor(ago/60)}h`;
-  const itensStr = (p.itens||[]).map(i=>`${i.qty}x ${i.name}${i.opts&&i.opts.length?" ("+i.opts.join(", ")+")":""}`).join("\n");
-  const btns = concluido ? "" : cfg.next.map(n=>
-    `<button class="btn-status ${n.cls}" onclick="updatePedidoStatus('${p.id}','${n.key}')">${n.label}</button>`
-  ).join("");
-  const taxaEntrega = p.taxaEntrega||0;
-  const totalFinal = p.total + taxaEntrega;
-  const taxaRow = p.entrega==="entrega" ? `
-    <div style="background:#fdf3f7;border-radius:10px;padding:8px 10px;margin-bottom:8px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-        <span style="font-size:.78rem;color:#888;flex:1;">Subtotal dos itens:</span>
-        <span style="font-size:.82rem;font-weight:700;">${fmt(p.total)}</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:.78rem;color:#7B2D52;font-weight:800;flex:1;">🛵 Taxa de entrega:</span>
-        ${concluido
-          ? `<span style="font-size:.82rem;font-weight:700;">${taxaEntrega>0?fmt(taxaEntrega):"A combinar"}</span>`
-          : `<div style="display:flex;gap:4px;align-items:center;">
-              <span style="font-size:.75rem;color:#aaa;">R$</span>
-              <input type="number" min="0" step="0.5" value="${taxaEntrega||""}" placeholder="0,00"
-                style="width:72px;border:1.5px solid #e8a0c0;border-radius:8px;padding:4px 8px;font-size:.85rem;font-family:'Nunito',sans-serif;outline:none;text-align:right;font-weight:800;"
-                id="taxa_${p.id}" onchange="salvarTaxa('${p.id}',this.value)">
-              <button onclick="salvarTaxa('${p.id}',document.getElementById('taxa_${p.id}').value)"
-                style="background:var(--pink-dark);color:white;border:none;border-radius:8px;padding:5px 10px;font-size:.8rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;">✓ Salvar</button>
-            </div>`
-        }
-      </div>
-    </div>` : "";
-  return `<div class="pedido-card">
-    <div class="pedido-card-top">
-      <span class="pedido-card-num">#${p.num} — ${p.nome}</span>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span class="pedido-card-time">${agoStr}</span>
-        <button onclick="imprimirComanda('${p.id}')" title="Imprimir comanda"
-          style="background:none;border:none;cursor:pointer;font-size:.95rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .2s;"
-          onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'">🖨️</button>
-        <button onclick="apagarPedido('${p.id}','${p.num}')" title="Apagar pedido"
-          style="background:none;border:none;cursor:pointer;font-size:.95rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .2s;"
-          onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'">🗑️</button>
-      </div>
-    </div>
-    <div class="pedido-card-info">📱 ${p.tel} • ${p.entrega==="entrega"?"🛵 Entrega":"🏠 Retirada"} • ${p.pagamento}</div>
-    ${p.endereco?`<div class="pedido-card-info">📍 <span style="user-select:all;-webkit-user-select:all;">${p.endereco}</span></div>`:""}
-    <div class="pedido-card-itens">${itensStr}</div>
-    ${taxaRow}
-    <div class="pedido-card-total" id="total_${p.id}">Total: ${fmt(totalFinal)}</div>
-    <div style="margin-bottom:8px;">
-      <span style="background:${cfg.color}22;color:${cfg.color};border-radius:20px;padding:3px 10px;font-size:.73rem;font-weight:800;">${cfg.label}</span>
-    </div>
-    ${btns?`<div class="pedido-status-btns">${btns}</div>`:""}
-  </div>`;
+  // kept for compatibility — rendering now done by renderIfoodDetail
+  return '';
 }
 
 function salvarTaxa(pedidoId, valor){
@@ -2489,15 +2767,7 @@ function updatePedidoStatus(pedidoId, newStatus){
     .catch(e=>console.error("Status update error:",e));
 }
 
-function toggleMinimize(){
-  const modal = document.querySelector('#adminOverlay .admin-modal');
-  const overlay = document.getElementById('adminOverlay');
-  const btn = document.getElementById('adminMinBtn');
-  const isMin = modal.classList.toggle('minimized');
-  overlay.classList.toggle('minimized-overlay', isMin);
-  btn.textContent = isMin ? '▲' : '—';
-  btn.title = isMin ? 'Expandir' : 'Minimizar';
-}
+function toggleMinimize(){ /* não utilizado no layout full-page */ }
 
 // ===== NOTIFICAÇÕES DE PEDIDOS =====
 let pedidosConhecidos = new Set();
@@ -2564,15 +2834,13 @@ function notificarNovoPedido(p){
       tag: p.id,
       renotify: true
     });
-    n.onclick = ()=>{ window.focus(); openAdmin(); aTab("pedidos", document.querySelector(".admin-tab:last-child")); };
+    n.onclick = ()=>{ window.focus(); openAdmin(); aTab("pedidos", document.querySelector(".adm-nav-item[data-sec='pedidos']")); };
   }
-  // Badge visual no botão da aba
-  const tabBtn = document.querySelector(".admin-tab:last-child");
-  if(tabBtn && !tabBtn.dataset.badge){
-    tabBtn.dataset.badge = "1";
-    tabBtn.style.position = "relative";
-    tabBtn.insertAdjacentHTML("beforeend",`<span id="pedidoBadge" style="position:absolute;top:4px;right:4px;background:#c62828;color:white;border-radius:50%;width:16px;height:16px;font-size:.6rem;display:flex;align-items:center;justify-content:center;font-weight:800;">!</span>`);
-  }
+  const badge = document.getElementById("pedidoBadge");
+  if(badge){ badge.style.display='inline-block'; badge.textContent='!'; }
+  // Se admin minimizado, adiciona badge na bolinha
+  const fb = document.getElementById('admFloatBar');
+  if(fb){ fb.innerHTML = '🍬 Admin <span style="background:#7B2D52;color:white;font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:4px;">!</span>'; }
   // Notificar a LOJA via WhatsApp usando template editável
   const msgLoja = preencherMsg(getMsgTemplate('novo_pedido'), p);
   const waLoja = WA.replace(/\D/g,"");
@@ -2618,36 +2886,122 @@ function iniciarEscutaPedidos(){
   });
 }
 
+function admMinimize(){
+  document.getElementById('adminOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  // Remove qualquer bolinha existente
+  const old = document.getElementById('admFloatBar');
+  if(old) old.remove();
+  // Cria o botão do zero via JS puro
+  const btn = document.createElement('button');
+  btn.id = 'admFloatBar';
+  btn.innerHTML = '🍬 Admin';
+  btn.style.cssText = [
+    'position:fixed',
+    'bottom:24px',
+    'right:24px',
+    'z-index:2147483647',
+    'background:#EC74A4',
+    'color:white',
+    'border:none',
+    'border-radius:50px',
+    'padding:14px 24px',
+    'font-size:15px',
+    'font-weight:800',
+    'font-family:Nunito,sans-serif',
+    'cursor:pointer',
+    'box-shadow:0 4px 20px rgba(236,116,164,.6)',
+    'display:flex',
+    'align-items:center',
+    'gap:10px',
+  ].join(';');
+  btn.onclick = admRestore;
+  document.body.appendChild(btn);
+}
+
+function admRestore(){
+  const fb = document.getElementById('admFloatBar');
+  if(fb) fb.remove();
+  document.getElementById('adminOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// Event listener direto no botão (não depende de onclick inline)
+document.addEventListener('DOMContentLoaded', ()=>{
+  const fb = document.getElementById('admFloatBar');
+  if(fb) fb.addEventListener('click', admRestore);
+});
+
+function admToggleSidebar(){
+  document.getElementById('admSidebar').classList.toggle('mob-open');
+  document.getElementById('admSidebarOverlay').classList.toggle('mob-open');
+}
+
+function admUpdateStatCards(){
+  try{
+    const hoje = new Date().toDateString();
+    const todayPedidos = pedidos.filter(p=>new Date(p.timestamp).toDateString()===hoje);
+    const fatHoje = todayPedidos.reduce((s,p)=>s+(parseFloat(p.total)||0),0);
+    const aguard = pedidos.filter(p=>p.status==='novo'||p.status==='aguardando').length;
+    document.getElementById('admStatHoje').textContent = todayPedidos.length;
+    document.getElementById('admStatFat').textContent = 'R$ '+fatHoje.toFixed(2).replace('.',',');
+    document.getElementById('admStatClientes').textContent = (typeof clients!=='undefined'?Object.keys(clients).length:'—');
+    document.getElementById('admStatAguard').textContent = aguard;
+  }catch(e){}
+}
+
+const ADM_PAGE_TITLES = {
+  status:'Status',pedidos:'Pedidos',clientes:'Clientes',
+  produtos:'Produtos',categorias:'Categorias',cupons:'Cupons',
+  stats:'Estatísticas',config:'Configurações',mensagens:'Mensagens'
+};
+
 function openAdmin(){
   document.getElementById("adminOverlay").classList.add("open");
+  document.body.style.overflow='hidden';
   document.querySelectorAll("input[name=st]").forEach(r=>r.checked=r.value===status);
   renderAdminProds();
   renderAdminCats();
   loadConfigUI();
   renderStats();
-  // Inicia escuta de pedidos se ainda não iniciou
+  admUpdateStatCards();
   if(!adminLogado){
     adminLogado = true;
     iniciarEscutaPedidos();
   }
-  // Remove badge ao abrir admin
   const badge = document.getElementById("pedidoBadge");
-  if(badge){ badge.remove(); delete document.querySelector(".admin-tab:last-child")?.dataset.badge; }
+  if(badge){ badge.style.display='none'; }
 }
-function closeAdmin(){document.getElementById("adminOverlay").classList.remove("open");}
+function closeAdmin(){
+  const overlay = document.getElementById("adminOverlay");
+  overlay.classList.remove("open");
+  const fb = document.getElementById('admFloatBar');
+  if(fb) fb.remove();
+  document.body.style.overflow='';
+  document.getElementById('admSidebar').classList.remove('mob-open');
+  document.getElementById('admSidebarOverlay').classList.remove('mob-open');
+}
 function aTab(name,btn){
   document.querySelectorAll(".admin-sec").forEach(s=>s.classList.remove("active"));
-  document.querySelectorAll(".admin-tab").forEach(b=>b.classList.remove("active"));
-  document.getElementById("atab-"+name).classList.add("active");btn.classList.add("active");
+  document.querySelectorAll(".adm-nav-item").forEach(b=>b.classList.remove("active"));
+  document.getElementById("atab-"+name).classList.add("active");
+  btn.classList.add("active");
+  // Update page title
+  document.getElementById('admPageTitle').textContent = ADM_PAGE_TITLES[name]||name;
   if(name==="stats") renderStats();
   if(name==="config") loadConfigUI();
   if(name==="categorias") renderAdminCats();
+  if(name==="carrinhos") renderCarrinhosAbandonados();
   if(name==="pedidos"){
     loadPedidos();
     renderKanban();
     const badge = document.getElementById("pedidoBadge");
-    if(badge){ badge.remove(); delete btn.dataset.badge; }
+    if(badge){ badge.style.display='none'; }
   }
+  admUpdateStatCards();
+  // close mobile sidebar after nav
+  document.getElementById('admSidebar').classList.remove('mob-open');
+  document.getElementById('admSidebarOverlay').classList.remove('mob-open');
   if(name==="clientes") renderAdminClientes();
   if(name==="cupons") renderAdminCupons();
   if(name==="mensagens") renderAdminMensagens();
@@ -2813,8 +3167,15 @@ function renderCompsEditor(){
       delOpt.style.cssText = 'background:none;border:none;cursor:pointer;color:#ccc;font-size:.9rem;flex-shrink:0;';
       delOpt.onclick = ()=>{ eComps[ci].options.splice(oi,1); renderCompsEditor(); };
 
+      const availBtn = document.createElement('button');
+      availBtn.textContent = opt.unavailable ? '🔴' : '🟢';
+      availBtn.title = opt.unavailable ? 'Indisponível — clique para ativar' : 'Disponível — clique para desativar';
+      availBtn.style.cssText = 'background:none;border:none;cursor:pointer;font-size:1rem;flex-shrink:0;';
+      availBtn.onclick = ()=>{ eComps[ci].options[oi].unavailable = !eComps[ci].options[oi].unavailable; renderCompsEditor(); };
+
       row.appendChild(nameInp);
       row.appendChild(priceInp);
+      row.appendChild(availBtn);
       row.appendChild(delOpt);
       optsDiv.appendChild(row);
     });
@@ -3379,7 +3740,7 @@ function fbSave(){
     status,
     customClosedMsg,
     photos: photoData,
-    config: { MIN, WA, pixKey, taxaConfig, fidelidadeConfig, openHour, closeHour, bannerText, bannerColor, showPascoaBanner, pascoaConfig, logoB64: logoB64||null },
+    config: { MIN, WA, pixKey, taxaConfig, fidelidadeConfig, openHour, closeHour, openTimeStr, closeTimeStr, bannerText, bannerColor, showPascoaBanner, pascoaConfig, logoB64: logoB64||null },
     categories: categories.map(cat=>({
       id: cat.id,
       label: cat.label,
@@ -3400,6 +3761,87 @@ function fbSave(){
     }))
   };
   set(ref(db,"cardapio"), data).catch(e=>console.error("Firebase save error:",e));
+}
+
+// ===== CARRINHOS ABANDONADOS =====
+let _cartSaveTimer = null;
+
+function salvarCarrinhoAbandonado(){
+  if(typeof db === 'undefined') return;
+  if(!cart || cart.length === 0){ limparCarrinhoAtual(); return; }
+  // Tenta pegar nome/tel do cliente logado ou dos campos de checkout
+  const nEl = document.getElementById('nomeCliente');
+  const tEl = document.getElementById('telCliente');
+  const nome = (clientUser?.nome) || (nEl?.value?.trim()) || '';
+  const tel  = (clientUser?.tel)  || (tEl?.value?.replace(/\D/g,'')) || '';
+  const id   = clientUser?.uid || ('anon_'+(tel||'x'));
+  const data = {
+    nome: nome || 'Visitante',
+    tel: tel || '',
+    itens: cart.map(i=>({ name:i.name, qty:i.qty, price:i.price, opts:i.opts||[] })),
+    total: cartTotal(),
+    timestamp: Date.now(),
+    url: window.location.href.split('?')[0]
+  };
+  set(ref(db, 'carrinhos_abandonados/'+id), data).catch(()=>{});
+}
+
+function limparCarrinhoAtual(){
+  if(typeof db === 'undefined' || !clientUser) return;
+  remove(ref(db, 'carrinhos_abandonados/'+clientUser.uid)).catch(()=>{});
+}
+
+function agendarSalvamentoCarrinho(){
+  clearTimeout(_cartSaveTimer);
+  if(!cart || cart.length === 0){ limparCarrinhoAtual(); return; }
+  _cartSaveTimer = setTimeout(salvarCarrinhoAbandonado, 30000); // salva após 30s sem ação
+}
+
+function renderCarrinhosAbandonados(){
+  const el = document.getElementById('carrinhoAbandonadoList');
+  if(!el) return;
+  if(typeof db === 'undefined'){ el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;">Firebase não conectado.</div>'; return; }
+  el.innerHTML = '<div style="text-align:center;padding:30px;color:#bbb;">Carregando...</div>';
+  get(ref(db, 'carrinhos_abandonados')).then(snap=>{
+    const dados = snap.val()||{};
+    const lista = Object.entries(dados).sort((a,b)=>b[1].timestamp-a[1].timestamp);
+    const badge = document.getElementById('carrinhoBadge');
+    if(badge){ badge.textContent=lista.length; badge.style.display=lista.length?'inline-block':'none'; }
+    if(!lista.length){ el.innerHTML='<div style="text-align:center;padding:40px;color:#bbb;font-size:.9rem;">✨ Nenhum carrinho abandonado por enquanto.</div>'; return; }
+    el.innerHTML = lista.map(([id,c])=>{
+      const dt = new Date(c.timestamp);
+      const dif = Math.round((Date.now()-c.timestamp)/60000);
+      const difTxt = dif<60 ? dif+'min atrás' : dif<1440 ? Math.round(dif/60)+'h atrás' : Math.round(dif/1440)+'d atrás';
+      const itensStr = (c.itens||[]).map(i=>`${i.qty}x ${i.name}`).join(', ');
+      const waNum = c.tel ? c.tel.replace(/\D/g,'') : '';
+      const waTxt = encodeURIComponent(`Oi ${c.nome||''}! 👋 Vi que você deixou alguns doces no carrinho na Sweet Olivia 🍬 Posso te ajudar a finalizar? É só me chamar! 😊`);
+      return `<div style="background:white;border-radius:12px;padding:16px;margin-bottom:10px;border:1px solid #f0e8ec;display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+        <div style="flex:1;min-width:180px;">
+          <div style="font-weight:800;font-size:.9rem;color:#1e0f18;">${c.nome||'Visitante'} ${c.tel?`<span style="color:#aaa;font-size:.78rem;font-weight:600;">${c.tel}</span>`:''}</div>
+          <div style="font-size:.78rem;color:#888;margin:3px 0;">${itensStr}</div>
+          <div style="font-size:.72rem;color:#bbb;">${difTxt} · ${dt.toLocaleDateString('pt-BR')} ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+        </div>
+        <div style="font-weight:800;color:#7B2D52;font-size:1rem;">R$ ${(c.total||0).toFixed(2).replace('.',',')}</div>
+        ${waNum ? `<a href="https://wa.me/55${waNum}?text=${waTxt}" target="_blank" style="background:#25D366;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:.78rem;font-weight:800;cursor:pointer;text-decoration:none;font-family:'Nunito',sans-serif;white-space:nowrap;">💬 WhatsApp</a>` : ''}
+        <button onclick="excluirCarrinhoAbandonado('${id}')" style="background:#fff0f0;border:1px solid #ffcdd2;border-radius:8px;padding:8px 10px;font-size:.78rem;color:#c62828;cursor:pointer;font-family:'Nunito',sans-serif;">🗑</button>
+      </div>`;
+    }).join('');
+  }).catch(()=>{ el.innerHTML='<div style="text-align:center;padding:30px;color:#bbb;">Erro ao carregar.</div>'; });
+}
+
+function excluirCarrinhoAbandonado(id){
+  if(!confirm('Remover este carrinho abandonado?')) return;
+  remove(ref(db,'carrinhos_abandonados/'+id)).then(()=>renderCarrinhosAbandonados()).catch(()=>{});
+}
+
+function limparCarrinhosAntigos(){
+  if(!confirm('Remover carrinhos abandonados com mais de 7 dias?')) return;
+  const limite = Date.now() - 7*24*60*60*1000;
+  get(ref(db,'carrinhos_abandonados')).then(snap=>{
+    const dados = snap.val()||{};
+    const velhos = Object.entries(dados).filter(([,c])=>c.timestamp<limite);
+    Promise.all(velhos.map(([id])=>remove(ref(db,'carrinhos_abandonados/'+id)))).then(()=>renderCarrinhosAbandonados());
+  });
 }
 
 function fbLoad(){
@@ -3442,6 +3884,8 @@ function fbLoad(){
         if(cfg.fidelidadeConfig) fidelidadeConfig = {...fidelidadeConfig, ...cfg.fidelidadeConfig};
         if(cfg.openHour!=null) openHour = cfg.openHour;
         if(cfg.closeHour!=null) closeHour = cfg.closeHour;
+        if(cfg.openTimeStr) openTimeStr = cfg.openTimeStr;
+        if(cfg.closeTimeStr) closeTimeStr = cfg.closeTimeStr;
         if(cfg.bannerText) bannerText = cfg.bannerText;
         if(cfg.bannerColor) bannerColor = cfg.bannerColor;
         if(cfg.showPascoaBanner!=null) showPascoaBanner = cfg.showPascoaBanner;
@@ -3583,7 +4027,13 @@ function apagarPedido(pedidoId, num){
   if(typeof remove==="undefined"||typeof db==="undefined") return;
   remove(ref(db,"pedidos/"+pedidoId)).then(()=>{
     delete pedidosData[pedidoId];
-    renderKanban();
+    // Se era o pedido selecionado, limpa o painel
+    if(ifoodSelectedId===pedidoId){
+      ifoodSelectedId = null;
+      const det = document.getElementById('ifoodDetail');
+      if(det) det.innerHTML = '<div style="text-align:center;color:#ccc;"><div style="font-size:2.5rem;margin-bottom:8px;">🛒</div><div style="font-size:.88rem;font-weight:700;">Selecione um pedido</div></div>';
+    }
+    renderIfoodList();
   }).catch(e=>alert("Erro ao apagar: "+e));
 }
 
@@ -4805,6 +5255,7 @@ function preencherMsg(template, p){
     .replace(/{itens}/g, itens.trim())
     .replace(/{endereco}/g, endereco)
     .replace(/{pagamento}/g, p.pagamento||'')
+    .replace(/{obs}/g, p.obs ? '📝 Obs: '+p.obs : '')
     .replace(/{id}/g, p.id||'')
     .replace(/{link}/g, link);
 }
@@ -4873,7 +5324,7 @@ Object.assign(window,{
   voltarListaPedidos,
   imprimirComanda,
   setStatus,openCustomClosed,closeCustomClosed,applyCustomClosed,
-  openLogin,closeLogin,checkLogin,adminLogout,openAdmin,closeAdmin,aTab,
+  openLogin,closeLogin,checkLogin,adminLogout,openAdmin,closeAdmin,aTab,admToggleSidebar,admUpdateStatCards,admMinimize,admRestore,
   renderAdminProds,togCat,moveProd,openEdit,openAdd,closeEdit,saveEdit,deleteProd,
   handlePhotoUpload,removePhoto,addComp,toggleMinimize,toggleEstoqueField,
   renderAdminCats,openAddCat,openEditCat,closeCatModal,saveCat,deleteCat,moveCat,togCatHidden,
@@ -4886,8 +5337,9 @@ Object.assign(window,{
   pedidosSubTab,renderHistorico,
   abrirModalCupom,fecharModalCupom,toggleTipoCupom,salvarCupom,renderAdminCupons,toggleAtivoCupom,deletarCupom,
   renderAdminMensagens,salvarMensagens,resetarMensagem,carregarMensagens,
+  renderCarrinhosAbandonados,excluirCarrinhoAbandonado,limparCarrinhosAntigos,agendarSalvamentoCarrinho,
   aplicarCupom,atualizarTotaisCheckout,
-  loadPedidos,renderKanban,updatePedidoStatus,criarPedidoFake,salvarTaxa,
+  loadPedidos,renderKanban,renderIfoodList,renderIfoodDetail,selectIfoodPedido,setIfoodFiltro,updatePedidoStatus,criarPedidoFake,salvarTaxa,
   iniciarEscutaPedidos,notificarNovoPedido,
   shareMenu,showClosed,closeClosedPopup,
   openPerfil,closePerfil,renderPerfil,editarDadosPerfil,salvarDadosPerfil,repetirPedido,
