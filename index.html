@@ -155,9 +155,15 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 .btn-concluir{background:var(--pink);color:white;border:none;border-radius:30px;padding:13px 16px;font-size:.88rem;font-weight:800;cursor:pointer;flex:2;font-family:"Nunito",sans-serif;}
 
 /* ===== CART ===== */
-.cart-modal{background:white;border-radius:22px 22px 0 0;width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;animation:slideUp .28s ease;}
-.cart-hdr{background:var(--pink-dark);color:white;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-radius:22px 22px 0 0;}
-.cart-hdr h2{font-family:"Playfair Display",serif;font-size:1.2rem;}
+.cart-modal{background:white;border-radius:26px 26px 0 0;width:100%;max-width:600px;height:88vh;display:flex;flex-direction:column;animation:slideUp .28s ease;}
+.cart-hdr{background:var(--pink-dark);color:white;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;border-radius:26px 26px 0 0;flex-shrink:0;}
+.cart-hdr h2{font-family:"Playfair Display",serif;font-size:1.25rem;display:flex;align-items:center;gap:10px;}
+.cart-body{padding:16px 18px;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
+.cart-foot{padding:16px 18px 28px;border-top:1px solid #f0e8ec;flex-shrink:0;background:white;}
+@media(min-width:520px){
+  .cart-modal{border-radius:20px;height:auto;max-height:90vh;}
+  #cartOverlay{align-items:center;}
+}
 .cart-close{background:rgba(255,255,255,.2);border:none;color:white;width:30px;height:30px;border-radius:50%;font-size:1rem;cursor:pointer;}
 .cart-body{padding:14px 18px;overflow-y:auto;flex:1;}
 .cart-empty{text-align:center;color:#bbb;padding:28px;font-size:.92rem;font-weight:600;}
@@ -448,7 +454,19 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
 <div class="banner" id="mainBanner">
   <div></div>
   <span id="bannerText" style="text-align:center;">Pedido mínimo: <b>R$ 20,00</b> • Entrega com taxa a combinar</span>
-  <div style="display:flex;justify-content:flex-end;align-items:center;">
+  <div style="display:flex;justify-content:flex-end;align-items:center;gap:6px;">
+
+    <!-- Ícone do carrinho sempre visível -->
+    <button onclick="openCart()" id="headerCartBtn" title="Ver carrinho"
+      style="position:relative;background:rgba(255,255,255,.2);color:white;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;"
+      onmouseover="this.style.background='rgba(255,255,255,.35)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+      <span id="headerCartBadge"
+        style="display:none;position:absolute;top:-3px;right:-3px;background:#EC74A4;color:white;font-size:.55rem;font-weight:800;min-width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center;border:1.5px solid white;padding:0 2px;"></span>
+    </button>
+
     <div id="clientBarGuest">
       <button onclick="openClientLogin()" style="background:var(--pink);color:white;border:none;border-radius:20px;padding:7px 18px;font-size:.85rem;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;">Entrar</button>
     </div>
@@ -589,11 +607,47 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
   </div>
 </div>
 
+<!-- BARRA FLUTUANTE DO CARRINHO -->
+<div id="cartFloatBar" onclick="openCart()" style="
+  display:none;
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:1900;
+  background:#7B2D52;
+  color:white;
+  padding:14px 20px;
+  cursor:pointer;
+  align-items:center;
+  justify-content:space-between;
+  font-family:'Nunito',sans-serif;
+  box-shadow:0 -2px 16px rgba(0,0,0,.18);
+  transition:transform .25s ease;
+  user-select:none;
+">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="background:rgba(255,255,255,.15);border-radius:10px;padding:6px 10px;font-size:.82rem;font-weight:800;" id="cartBarQty">1 item</div>
+    <span style="font-size:.88rem;font-weight:700;opacity:.85;">Ver carrinho</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span style="font-size:1.05rem;font-weight:800;" id="cartBarTotal">R$ 0,00</span>
+    <span style="font-size:1.2rem;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    </span>
+  </div>
+</div>
+
 <!-- CART OVERLAY -->
 <div class="overlay" id="cartOverlay">
   <div class="cart-modal">
     <div class="cart-hdr">
-      <h2>🛒 Carrinho</h2>
+      <h2>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        Meu Carrinho
+      </h2>
       <button class="cart-close" onclick="closeCart()">×</button>
     </div>
     <div class="cart-body" id="cartBody"></div>
@@ -631,10 +685,23 @@ footer p{font-size:.83rem;opacity:.9;margin:2px 0;font-weight:600;}
       </div>
       <div id="addrBlock" style="display:none">
         <label class="field-lbl" style="margin-bottom:10px;">📍 Endereço de entrega</label>
-        <input type="text" class="field-inp" id="coRua" placeholder="Rua / Avenida" style="margin-bottom:8px;" oninput="resetarTaxa()">
+
+        <!-- Campo de busca com autocomplete -->
+        <div style="position:relative;margin-bottom:8px;">
+          <input type="text" class="field-inp" id="coRua"
+            placeholder="Digite sua rua ou avenida..."
+            autocomplete="off"
+            oninput="enderecoAutocomplete(this.value)"
+            style="padding-right:36px;">
+          <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1rem;opacity:.4;pointer-events:none;">🔍</span>
+          <div id="enderecoSugestoes"
+            style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1.5px solid #e8a0c0;border-top:none;border-radius:0 0 12px 12px;z-index:999;max-height:220px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.1);">
+          </div>
+        </div>
+
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <div style="flex:1;">
-            <input type="text" class="field-inp" id="coNumero" placeholder="Número" id="coNumero" oninput="resetarTaxa()">
+            <input type="text" class="field-inp" id="coNumero" placeholder="Número" oninput="resetarTaxa()">
           </div>
           <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;color:#666;white-space:nowrap;cursor:pointer;">
             <input type="checkbox" id="coSemNumero" onchange="toggleSemNumero()" style="accent-color:var(--pink);width:16px;height:16px;"> Sem número
@@ -1721,16 +1788,50 @@ function buildItem(){
   Object.values(compSel).forEach(s=>{price+=s.price||0;opts.push(s.name);});
   return {...curItem.p,price,qty:curQty,obs:document.getElementById("iObs").value.trim(),opts,catId:curItem.catId};
 }
-function addCart(){if(!valComps())return;cart.push(buildItem());closeItem();openCart();agendarSalvamentoCarrinho();}
-function concluir(){if(!valComps())return;cart.push(buildItem());closeItem();goCheckout();agendarSalvamentoCarrinho();}
+function addCart(){if(!valComps())return;cart.push(buildItem());closeItem();openCart();agendarSalvamentoCarrinho();updateCartBar();}
+function concluir(){if(!valComps())return;cart.push(buildItem());closeItem();goCheckout();agendarSalvamentoCarrinho();updateCartBar();}
 function closeItem(){document.getElementById("itemOverlay").classList.remove("open");curItem=null;}
 
 // ===== CART =====
-function openCart(){renderCart();document.getElementById("cartOverlay").classList.add("open");}
-function closeCart(){document.getElementById("cartOverlay").classList.remove("open");}
+function updateCartBar(){
+  const bar = document.getElementById('cartFloatBar');
+  const badge = document.getElementById('headerCartBadge');
+  const qty = cart.reduce((s,i)=>s+i.qty, 0);
+  const total = cartTotal();
+
+  // Header badge — sempre atualiza
+  if(badge){
+    if(qty > 0){
+      badge.textContent = qty > 9 ? '9+' : qty;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Barra flutuante no fundo
+  if(bar){
+    if(!cart.length || total === 0){
+      bar.style.display = 'none';
+    } else {
+      bar.style.display = 'flex';
+      document.getElementById('cartBarTotal').textContent = fmt(total);
+      document.getElementById('cartBarQty').textContent = qty + ' item' + (qty !== 1 ? 's' : '');
+    }
+  }
+}
+
+function openCart(){renderCart();document.getElementById("cartOverlay").classList.add("open");document.getElementById('cartFloatBar').style.display='none';}
+function closeCart(){document.getElementById("cartOverlay").classList.remove("open");updateCartBar();}
 function renderCart(){
   const body=document.getElementById("cartBody"),foot=document.getElementById("cartFoot");
-  if(!cart.length){body.innerHTML=`<div class="cart-empty">Seu carrinho está vazio 🛒</div>`;foot.style.display="none";return;}
+  if(!cart.length){body.innerHTML=`<div class="cart-empty" style="padding:50px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#EC74A4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".4">
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+    </svg>
+    <b style="color:#7B2D52;font-size:1.05rem;">Seu carrinho está vazio</b>
+    <span style="font-size:.88rem;color:#aaa;text-align:center;max-width:220px;">Explore o cardápio e adicione seus doces favoritos 🍬</span>
+  </div>`;foot.style.display="none";return;}
   let h="";
   cart.forEach((item,i)=>{
     h+=`<div class="cart-item">
@@ -1756,10 +1857,11 @@ function renderCart(){
   document.getElementById("cartTotal").textContent=fmt(cartTotal());
   foot.style.display="block";
 }
-function cqty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);renderCart();agendarSalvamentoCarrinho();}
+function cqty(i,d){cart[i].qty+=d;if(cart[i].qty<=0)cart.splice(i,1);renderCart();agendarSalvamentoCarrinho();updateCartBar();}
 
 // ===== CHECKOUT =====
 function goCheckout(){
+  document.getElementById('cartFloatBar').style.display='none';
   if(cartTotal()<MIN){
     alert("Valor mínimo do pedido é "+fmt(MIN)+"!");
     return;
@@ -1802,7 +1904,7 @@ function goCheckout(){
   // Garante que o box PIX aparece e QR é gerado na abertura (padrão PIX)
   selPag(pag);
 }
-function closeCheckout(){document.getElementById("checkoutOverlay").classList.remove("open");}
+function closeCheckout(){document.getElementById("checkoutOverlay").classList.remove("open");updateCartBar();}
 function toggleSemNumero(){
   const sem = document.getElementById("coSemNumero").checked;
   const numInput = document.getElementById("coNumero");
@@ -1870,6 +1972,69 @@ function resetarTaxa(){
   atualizarTotaisCheckout();
 }
 
+// ===== AUTOCOMPLETE DE ENDEREÇO =====
+let _autoTimer = null;
+let _autoCoords = null; // coords selecionadas pelo autocomplete
+
+function enderecoAutocomplete(val){
+  resetarTaxa();
+  _autoCoords = null;
+  const box = document.getElementById('enderecoSugestoes');
+  clearTimeout(_autoTimer);
+  if(!val || val.length < 4){ box.style.display='none'; return; }
+  _autoTimer = setTimeout(async ()=>{
+    const cidade = document.getElementById('coCidade')?.value||'Juazeiro do Norte';
+    const q = `${val}, ${cidade}, Ceará, Brasil`;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&countrycodes=br&addressdetails=1`,
+        { headers:{ 'Accept-Language':'pt-BR', 'User-Agent':'SweetOliviaDoces/1.0' } });
+      const data = await res.json();
+      if(!data.length){ box.innerHTML='<div style="padding:12px;font-size:.82rem;color:#aaa;text-align:center;">Nenhum endereço encontrado</div>'; box.style.display='block'; return; }
+      box.innerHTML = data.map((item,i)=>{
+        const addr = item.address||{};
+        const rua = addr.road||addr.pedestrian||addr.footway||item.display_name.split(',')[0];
+        const bairro = addr.suburb||addr.neighbourhood||addr.quarter||'';
+        const cidade2 = addr.city||addr.town||addr.municipality||'';
+        const label = [rua, bairro, cidade2].filter(Boolean).join(', ');
+        return `<div onclick="selecionarEndereco(${i})" data-idx="${i}"
+          style="padding:11px 14px;cursor:pointer;font-size:.83rem;border-bottom:1px solid #f5eef2;transition:background .15s;"
+          onmouseover="this.style.background='#fdf0f6'" onmouseout="this.style.background='white'">
+          📍 ${label}
+        </div>`;
+      }).join('');
+      box.dataset.results = JSON.stringify(data);
+      box.style.display='block';
+    } catch(e){ box.style.display='none'; }
+  }, 400);
+}
+
+function selecionarEndereco(idx){
+  const box = document.getElementById('enderecoSugestoes');
+  const data = JSON.parse(box.dataset.results||'[]');
+  const item = data[idx];
+  if(!item) return;
+  const addr = item.address||{};
+  const rua = addr.road||addr.pedestrian||addr.footway||item.display_name.split(',')[0];
+  const bairro = addr.suburb||addr.neighbourhood||addr.quarter||'';
+  const cidade = addr.city||addr.town||addr.municipality||'Juazeiro do Norte';
+  document.getElementById('coRua').value = rua;
+  if(bairro) document.getElementById('coBairro').value = bairro;
+  if(cidade) document.getElementById('coCidade').value = cidade;
+  // Salva coords para calcular sem precisar geocodificar de novo
+  _autoCoords = { lat: parseFloat(item.lat), lng: parseFloat(item.lon) };
+  box.style.display='none';
+  // Foca no número
+  document.getElementById('coNumero')?.focus();
+}
+
+// Fecha sugestões ao clicar fora
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#enderecoSugestoes') && e.target.id!=='coRua'){
+    const box = document.getElementById('enderecoSugestoes');
+    if(box) box.style.display='none';
+  }
+});
+
 async function calcularTaxaEntrega(){
   const rua    = document.getElementById("coRua").value.trim();
   const bairro = document.getElementById("coBairro").value.trim();
@@ -1905,19 +2070,26 @@ async function calcularTaxaEntrega(){
   const enderecoCompleto = `${rua}, ${bairro}, ${cidade}, Ceara, Brasil`;
 
   try {
-    // 1. Geocodificar via Nominatim
-    const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(enderecoCompleto)}&format=json&limit=1&countrycodes=br`;
-    const geoRes = await fetch(geoUrl, { headers:{ "Accept-Language":"pt-BR", "User-Agent":"SweetOliviaDoces/1.0" } });
-    const geoData = await geoRes.json();
+    let destLat, destLng;
 
-    if(!geoData || !geoData.length){
-      mostrarTaxaErro("Endereco nao encontrado. Verifique e tente novamente.");
-      btn.innerHTML = "Calcular taxa de entrega"; btn.disabled = false;
-      return;
+    // Se o cliente selecionou do autocomplete, usa as coords salvas (sem nova requisição)
+    if(_autoCoords){
+      destLat = _autoCoords.lat;
+      destLng = _autoCoords.lng;
+    } else {
+      // 1. Geocodificar via Nominatim
+      const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(enderecoCompleto)}&format=json&limit=1&countrycodes=br`;
+      const geoRes = await fetch(geoUrl, { headers:{ "Accept-Language":"pt-BR", "User-Agent":"SweetOliviaDoces/1.0" } });
+      const geoData = await geoRes.json();
+
+      if(!geoData || !geoData.length){
+        mostrarTaxaErro("Endereço não encontrado. Tente digitar no campo acima e selecionar uma sugestão.");
+        btn.innerHTML = "🛵 Calcular taxa de entrega"; btn.disabled = false;
+        return;
+      }
+      destLat = parseFloat(geoData[0].lat);
+      destLng = parseFloat(geoData[0].lon);
     }
-
-    const destLat = parseFloat(geoData[0].lat);
-    const destLng = parseFloat(geoData[0].lon);
 
     // 2. Tentar rota via OSRM, com fallback haversine ×1.3
     try {
@@ -2124,7 +2296,8 @@ function enviar(){
   closeCheckout();
   addOrderToStats(totalFinal);
   cart=[];
-  limparCarrinhoAtual(); // remove carrinho abandonado pois pedido foi finalizado
+  limparCarrinhoAtual();
+  updateCartBar(); // esconde a barra após pedido enviado
   taxaCalculada = null;
   cupomAplicado = null;
   // Show tracking modal
@@ -2577,6 +2750,9 @@ function renderIfoodList(){
         <span style="font-weight:800;font-size:.85rem;color:#1e0f18;">#${p.num} ${p.nome}</span>
         <div style="display:flex;align-items:center;gap:4px;">
           <span style="font-size:.68rem;color:#bbb;white-space:nowrap;">${agoStr}</span>
+          <button onclick="event.stopPropagation();imprimirComanda('${p.id}')"
+            style="background:none;border:none;cursor:pointer;font-size:.85rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .15s;"
+            onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'" title="Imprimir comanda">🖨️</button>
           <button onclick="event.stopPropagation();apagarPedido('${p.id}','${p.num}')"
             style="background:none;border:none;cursor:pointer;font-size:.85rem;opacity:.4;padding:0 2px;line-height:1;transition:opacity .15s;"
             onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.4'" title="Apagar pedido">🗑️</button>
@@ -5314,7 +5490,7 @@ function resetarMensagem(key){
 
 Object.assign(window,{
   goTo,openItem,closeItem,chQty,selComp,addCart,concluir,
-  openCart,closeCart,cqty,goCheckout,closeCheckout,selEntrega,selPag,enviar,toggleSemNumero,showTrackingModal,copiarPix,atualizarQRCode,atualizarAvisoEntrega,calcularTaxaEntrega,resetarTaxa,
+  openCart,closeCart,cqty,goCheckout,closeCheckout,selEntrega,selPag,enviar,toggleSemNumero,showTrackingModal,copiarPix,atualizarQRCode,atualizarAvisoEntrega,calcularTaxaEntrega,resetarTaxa,enderecoAutocomplete,selecionarEndereco,updateCartBar,
   openTrackingPage,closeTrackingPage,buscarMeuPedido,renderTrackingLogin,
   openClientLogin,closeClientLogin,showClientLogin,showClientRegister,
   clientLogin,clientRegister,clientLogout,
